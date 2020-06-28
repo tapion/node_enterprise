@@ -4,6 +4,8 @@ const operatorRoute = require('./api/operators');
 const authRoute = require('./api/auth');
 const rolsRoute = require('./api/rols');
 const notificationsRoute = require('./api/notifications');
+const usersRoute = require('./api/users');
+const clientsRoute = require('./api/clients');
 
 const app = express();
 
@@ -13,12 +15,8 @@ app.use('/operators/', operatorRoute);
 app.use('/auth/', authRoute);
 app.use('/rols/', rolsRoute);
 app.use('/notifications/', notificationsRoute);
-
-app.get('/', (req, res) => {
-  res.status(200).json({
-    saludo: 'hola Miguel',
-  });
-});
+app.use('/users/', usersRoute);
+app.use('/clients/', clientsRoute);
 
 app.listen(3000, () => {
   console.log('Inicio esto');
