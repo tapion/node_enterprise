@@ -2,7 +2,9 @@ const Joi = require('@hapi/joi');
 
 exports.login = (req, res) => {
   try {
-    if (req.body.username === 'tapion') throw { message: 'Usuario muy pro' };
+    if (req.body.username === 'tapion') {
+      throw { message: 'Usuario muy pro' };
+    }
     const shema = Joi.object({
       username: Joi.string().required(),
       password: Joi.string().required(),
