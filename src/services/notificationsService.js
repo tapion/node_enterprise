@@ -35,7 +35,6 @@ exports.addNotification = (req, res) => {
 
 exports.getNotification = (req, res) => {
   try {
-    const Joi = require('@hapi/joi');
     const schema = Joi.object({
       notificationId: Joi.number().integer().min(1),
     });
