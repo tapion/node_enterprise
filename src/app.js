@@ -15,16 +15,16 @@ const app = express();
 
 app.use(compression());
 app.use(express.json());
-app.use('/operators/', operatorRoute);
-app.use('/auth/', authRoute);
-app.use('/rols/', rolsRoute);
-app.use('/notifications/', notificationsRoute);
-app.use('/users/', usersRoute);
-app.use('/clients/', clientsRoute);
-app.use('/zones/', zoneRoute);
-app.use('/states/', stateRoute);
-app.use('/dashBoard/', dashBoardRoute);
-app.use('/workFlow/', workFlowRoute);
+app.use('/v1/operators/', operatorRoute);
+app.use('/v1/auth/', authRoute);
+app.use('/v1/rols/', rolsRoute);
+app.use('/v1/notifications/', notificationsRoute);
+app.use('/v1/users/', usersRoute);
+app.use('/v1/clients/', clientsRoute);
+app.use('/v1/zones/', zoneRoute);
+app.use('/v1/states/', stateRoute);
+app.use('/v1/dashBoard/', dashBoardRoute);
+app.use('/v1/workFlow/', workFlowRoute);
 
 app.listen(3000, () => {
   console.log('Inicio esto');
