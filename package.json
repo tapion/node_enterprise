@@ -4,7 +4,8 @@
   "description": "API for bokyLog app",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "nodemon src/app.js",
+    "start:prod": "NODE_ENV=production node src/app.js"
   },
   "repository": {
     "type": "git",

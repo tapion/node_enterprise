@@ -1,0 +1,10 @@
+version: "3.8"
+services: 
+  app:
+    image: node:12-alpine3.12
+    working_dir: /app
+    volumes: 
+      - ./:/app
+    command: sh -c "npm install --production && npm run start:prod"
+    ports: 
+      - 3000:3000
