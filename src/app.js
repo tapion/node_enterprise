@@ -17,7 +17,7 @@ app.use(compression());
 app.use(express.json());
 app.use('/v1/operators/', operatorRoute);
 app.use('/v1/auth/', authRoute);
-app.use('/v1/rols/', rolsRoute);
+app.use('/v1/roles/', rolsRoute);
 app.use('/v1/notifications/', notificationsRoute);
 app.use('/v1/users/', usersRoute);
 app.use('/v1/clients/', clientsRoute);
