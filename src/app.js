@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const compression = require('compression');
 const operatorRoute = require('./api/operators');
 const authRoute = require('./api/auth');
@@ -13,6 +14,8 @@ const workFlowRoute = require('./api/workFlows');
 
 const app = express();
 
+app.use(cors());
+app.options('*', cors());
 app.use(compression());
 app.use(express.json());
 app.use('/v1/operators/', operatorRoute);
