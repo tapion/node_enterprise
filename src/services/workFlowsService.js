@@ -6,10 +6,10 @@ exports.getWorkFlows = (req, res) => {
       dateType: Joi.number().integer().min(0).required(),
       startDate: Joi.date().max(Joi.ref('endDate')).required(),
       endDate: Joi.date().required(),
-      idClient: Joi.number().integer().min(0),
-      idOperator: Joi.number().integer().min(0),
-      idDivision: Joi.number().integer().min(0),
-      idState: Joi.number().integer().min(0),
+      idClient: Joi.number().integer().min(0).empty(''),
+      idOperator: Joi.number().integer().min(0).empty(''),
+      idDivision: Joi.number().integer().min(0).empty(''),
+      idState: Joi.number().integer().min(0).empty(''),
     });
     const validate = schema.validate(req.query);
     if(validate.error){
