@@ -6,23 +6,23 @@ exports.getAllStates = (req, res) => {
       data: [
         {
           id: 1,
-          description: 'Sin asignar',
+          name: 'Sin asignar',
         },
         {
           id: 2,
-          description: 'Asignada',
+          name: 'Asignada',
         },
         {
           id: 3,
-          description: 'En ejecucion',
+          name: 'En ejecucion',
         },
         {
           id: 4,
-          description: 'Sin firma',
+          name: 'Sin firma',
         },
         {
           id: 5,
-          description: 'Cerrada',
+          name: 'Cerrada',
         },
       ],
     });

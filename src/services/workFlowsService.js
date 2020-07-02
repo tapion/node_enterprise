@@ -21,7 +21,7 @@ exports.getWorkFlows = (req, res) => {
       data: [
         {
           id: 1,
-          description: 'Actividad 1',
+          name: 'Actividad 1',
           date: new Date().setDate(new Date().getMinutes - 30),
           client: {
             id: 2,
@@ -33,16 +33,16 @@ exports.getWorkFlows = (req, res) => {
           },
           zone: {
             id: 3,
-            description: 'Sur Oriente',
+            name: 'Sur Oriente',
           },
           state: {
             id: 1,
-            description: 'Sin asignar',
+            name: 'Sin asignar',
           },
         },
         {
           id: 2,
-          description: 'Actividad 2',
+          name: 'Actividad 2',
           date: new Date().setDate(new Date().getMinutes - 60),
           client: {
             id: 1,
@@ -54,16 +54,16 @@ exports.getWorkFlows = (req, res) => {
           },
           zone: {
             id: 5,
-            description: 'Sur',
+            name: 'Sur',
           },
           state: {
             id: 4,
-            description: 'Sin firma',
+            name: 'Sin firma',
           },
         },
         {
           id: 3,
-          description: 'Actividad 3',
+          name: 'Actividad 3',
           date: new Date().setDate(new Date().getMinutes - 120),
           client: {
             id: 3,
@@ -75,11 +75,11 @@ exports.getWorkFlows = (req, res) => {
           },
           zone: {
             id: 6,
-            description: 'Norte',
+            name: 'Norte',
           },
           state: {
             id: 5,
-            description: 'Cerrada',
+            name: 'Cerrada',
           },
         },
       ],

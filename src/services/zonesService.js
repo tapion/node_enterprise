@@ -6,27 +6,27 @@ exports.getAllZones = (req, res) => {
       data: [
         {
           id: 1,
-          description: 'Sur Occidente',
+          name: 'Sur Occidente',
         },
         {
           id: 2,
-          description: 'Nor Occidente',
+          name: 'Nor Occidente',
         },
         {
           id: 3,
-          description: 'Sur oriente',
+          name: 'Sur oriente',
         },
         {
           id: 4,
-          description: 'Nor Oriente',
+          name: 'Nor Oriente',
         },
         {
           id: 5,
-          description: 'Sur',
+          name: 'Sur',
         },
         {
           id: 6,
-          description: 'Norte',
+          name: 'Norte',
         },
       ],
     });
