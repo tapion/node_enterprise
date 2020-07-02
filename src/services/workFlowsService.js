@@ -4,12 +4,12 @@ exports.getWorkFlows = (req, res) => {
   try {
     const schema = Joi.object({
       dateType: Joi.number().integer().min(0).required(),
-      starDate: Joi.date().max(Joi.ref('endDate')).required(),
+      startDate: Joi.date().max(Joi.ref('endDate')).required(),
       endDate: Joi.date().required(),
-      idClient: Joi.number().integer().min(0).required(),
-      idOperator: Joi.number().integer().min(0).required(),
-      idDivision: Joi.number().integer().min(0).required(),
-      idState: Joi.number().integer().min(0).required(),
+      idClient: Joi.number().integer().min(0),
+      idOperator: Joi.number().integer().min(0),
+      idDivision: Joi.number().integer().min(0),
+      idState: Joi.number().integer().min(0),
     });
     const validate = schema.validate(req.query);
     if(validate.error){
@@ -22,7 +22,7 @@ exports.getWorkFlows = (req, res) => {
         {
           id: 1,
           name: 'Actividad 1',
-          date: new Date().setDate(new Date().getMinutes - 30),
+          date: new Date().setDate(new Date().getMinutes() - 30),
           client: {
             id: 2,
             name: 'Pepsi',
@@ -43,7 +43,7 @@ exports.getWorkFlows = (req, res) => {
         {
           id: 2,
           name: 'Actividad 2',
-          date: new Date().setDate(new Date().getMinutes - 60),
+          date: new Date().setDate(new Date().getMinutes() - 60),
           client: {
             id: 1,
             name: 'Cumis',
@@ -64,7 +64,7 @@ exports.getWorkFlows = (req, res) => {
         {
           id: 3,
           name: 'Actividad 3',
-          date: new Date().setDate(new Date().getMinutes - 120),
+          date: new Date().setDate(new Date().getMinutes() - 120),
           client: {
             id: 3,
             name: 'Vanti',
