@@ -1,17 +1,54 @@
 const Joi = require('@hapi/joi');
+const db = require('../db/index');
 
-exports.getWorkFlows = (req, res) => {
+exports.create = (req, res) => {
   try {
-    const schema = Joi.object({
-      dateType: Joi.number().integer().min(0).required(),
-      startDate: Joi.date().max(Joi.ref('endDate')).required(),
-      endDate: Joi.date().required(),
-      idClient: Joi.number().integer().min(0).empty(''),
-      idOperator: Joi.number().integer().min(0).empty(''),
-      idDivision: Joi.number().integer().min(0).empty(''),
-      idState: Joi.number().integer().min(0).empty(''),
+    // db.query(
+    //   'SELECT * FROM hola where id = $1', [1],
+    //   (err, res) => {
+    //     console.log(res.rows[0]);
+    //   }
+    // );
+
+    db.getClient((err, client, done )=>{
+      client.query('SELECT * FROM hola where id = $1', [1],(err, res) => {
+        console.log(res.rows[0]);
+        done();
+      })
     });
-    const validate = schema.validate(req.query);
+
+    const schema = Joi.object({
+      id: Joi.number().integer().allow(null).empty(''),
+      name: Joi.string().required(),
+      description: Joi.string().required(),
+      state: Joi.boolean().required(),
+      questions: Joi.array().items(
+        Joi.object({
+          id: Joi.number().integer().allow(null).empty(''),
+          title: Joi.string().required(),
+          description: Joi.string().required(),
+          type: Joi.string().required(),
+          icon: Joi.string(),
+          value: Joi.string().required(),
+          conditions: Joi.array(),
+          isRequired: Joi.boolean().required(),
+          invalidMessageKey: Joi.string().required(),
+          source: Joi.object({
+            idTable: Joi.string(),
+            nameSource: Joi.string(),
+            values: Joi.array().items(
+              Joi.object({
+                id: Joi.number().integer().required(),
+                name: Joi.string().required(),
+                value: Joi.string().required(),
+                state: Joi.boolean().required(),
+              })
+            ),
+          }),
+        })
+      ),
+    });
+    const validate = schema.validate(req.body);
     if (validate.error) {
       throw validate.error;
     }

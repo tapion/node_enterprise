@@ -11,6 +11,10 @@ const zoneRoute = require('./api/zones');
 const stateRoute = require('./api/states');
 const dashBoardRoute = require('./api/dashboard');
 const workFlowRoute = require('./api/workFlows');
+const formRoute = require('./api/forms');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: './config.env' });
 
 const app = express();
 
@@ -28,6 +32,7 @@ app.use('/v1/zones/', zoneRoute);
 app.use('/v1/states/', stateRoute);
 app.use('/v1/dashBoard/', dashBoardRoute);
 app.use('/v1/workFlow/', workFlowRoute);
+app.use('/v1/forms/', formRoute);
 
 app.listen(3000, () => {
   console.log('Inicio esto');

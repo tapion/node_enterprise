@@ -4,7 +4,7 @@
   "description": "API for bokyLog app",
   "main": "index.js",
   "scripts": {
-    "start:dev": "nodemon src/app.js",
+    "start": "nodemon src/app.js",
     "start:prod": "NODE_ENV=production node src/app.js"
   },
   "repository": {
@@ -19,7 +19,8 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "pg": "^8.3.0"
   },
   "devDependencies": {
     "eslint": "^7.3.1",
