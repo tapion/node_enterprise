@@ -1,22 +1,8 @@
 const Joi = require('@hapi/joi');
-const db = require('../db/index');
+const formModel = require('../models/formModel');
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
   try {
-    // db.query(
-    //   'SELECT * FROM hola where id = $1', [1],
-    //   (err, res) => {
-    //     console.log(res.rows[0]);
-    //   }
-    // );
-
-    db.getClient((err, client, done )=>{
-      client.query('SELECT * FROM hola where id = $1', [1],(err, res) => {
-        console.log(res.rows[0]);
-        done();
-      })
-    });
-
     const schema = Joi.object({
       id: Joi.number().integer().allow(null).empty(''),
       name: Joi.string().required(),
@@ -52,6 +38,9 @@ exports.create = (req, res) => {
     if (validate.error) {
       throw validate.error;
     }
+    const test = await formModel.CreateForm(req.body);
+    console.log('termino con',test);
+    // formModel.test(req.body.questions[0].source.values);
     res.status(200).json({
       status: 'success',
       serverTime: Date.now(),
