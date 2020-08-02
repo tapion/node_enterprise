@@ -67,7 +67,7 @@ exports.CreateForm = async (body, sec, quest) => {
             body.userName,
           ]
         );
-        question.id = res.rows[0].id;
+        question.idk = res.rows[0].id;
         question.section_idk = sectionId;
         return question;
       })

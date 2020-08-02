@@ -13,7 +13,7 @@ const prepareResponse = (req, obj) => {
   req.forEach((el) => {
     const tmp = obj.find((objEle) => objEle.id == el.id);
     if (tmp) {
-      el.id = tmp.idk;
+      el.id = el.idk;
       el.idSection = tmp.section_idk || null;
       el.isNew = false;
     }
@@ -47,7 +47,7 @@ exports.create = async (req, res) => {
               targetProperty: Joi.string().required(),
               targetValue: Joi.string().required(),
               state: Joi.boolean().required(),
-              isNew: Joi.boolean().required(),
+              // isNew: Joi.boolean().required(),
             })
           ),
           isRequired: Joi.boolean().required(),
@@ -62,7 +62,7 @@ exports.create = async (req, res) => {
               name: Joi.string().required(),
               value: Joi.string().required(),
               state: Joi.boolean().required(),
-              isNew: Joi.boolean().required(),
+              // isNew: Joi.boolean().required(),
             })
           ),
           isNew: Joi.boolean().required(),
