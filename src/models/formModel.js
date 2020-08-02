@@ -1,37 +1,56 @@
 const db = require('../db');
 
-exports.CreateForm = async (req) => {
+exports.CreateForm = async (body, sec, quest) => {
   return await db.transactions(async (client) => {
     const form = {};
     let res = await client.query(
-      'INSERT INTO forms ("name", description, state, user_creation) VALUES ($1,$2,$3, 1) RETURNING id;',
-      [req.name, req.description, req.state]
+      'INSERT INTO forms ("name", description, state, user_creation) VALUES ($1,$2,$3, $4) RETURNING id;',
+      [body.name, body.description, body.state, body.userName]
     );
     form.id = res.rows[0].id;
-
-    res = await client.query(
-      'INSERT INTO sections ("name", state, form_id, user_creation) VALUES ($1,$2, $3, 1) RETURNING id;',
-      ['Test', true, form.id]
+    const newSections = await Promise.all(
+      sec.map(async (section) => {
+        res = await client.query(
+          'INSERT INTO sections ("name", state, form_id, user_creation) VALUES ($1,$2, $3, $4) RETURNING id;',
+          [section.title, section.isRequired, form.id, body.userName]
+        );
+        section.idk = res.rows[0].id;
+        return section;
+      })
     );
-    form.sectionId = res.rows[0].id;
-    //mejora usando map, para retornar un nuevo objeto
     const newQuestions = await Promise.all(
-      req.questions.map(async (question) => {
-        const values = question.source.values.reduce((acc, val, idx) => {
-          if (idx === 1) {
-            return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
-          }
-          return `${acc},${JSON.stringify(val)}`;
-        });
+      quest.map(async (question) => {
+        let values = '';
+        if (question.source.length > 0) {
+          values = question.source.reduce((acc, val, idx) => {
+            if (idx === 1) {
+              return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
+            }
+            return `${acc},${JSON.stringify(val)}`;
+          });
+        } else {
+          values = '';
+        }
+        let condition = '';
+        if (question.conditions > 0) {
+          condition = question.conditions.reduce((acc, val, idx) => {
+            if (idx === 1) {
+              return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
+            }
+            return `${acc},${JSON.stringify(val)}`;
+          });
+        } else {
+          condition = '';
+        }
+        const sectionId = newSections.find((el) => el.id == question.idSection)
+          .idk;
         res = await client.query(
           `INSERT INTO questions(
             title
             ,description
             ,"type"
             , icon
-            , value
             , conditions
-            , invalidmessagekey
             , isrequired
             , source_idtable
             , source_namesource
@@ -39,47 +58,29 @@ exports.CreateForm = async (req) => {
             , section_id
             , user_creation
             )
-        VALUES($1,$2, $3, $4, $5,$6,$7,$8,$9,$10,$11,$12,1) RETURNING id;`,
+        VALUES($1,$2, $3, $4, $5,$6,$7,$8,$9,$10,$11) RETURNING id;`,
           [
             question.title,
             question.description,
             question.type,
             question.icon,
-            question.value,
-            question.conditions,
-            question.invalidMessageKey,
+            `[${condition}]`,
             question.isRequired,
-            question.source.idTable,
-            question.source.nameSource,
+            question.idTable,
+            question.nameSource,
             `[${values}]`,
-            form.sectionId,
+            sectionId,
+            body.userName,
           ]
         );
         question.id = res.rows[0].id;
+        question.section_idk = sectionId;
         return question;
       })
     );
-    req.id = form.id;
-    req.questions = newQuestions;
-    return req;
+    body.id = form.id;
+    body.questions = newQuestions;
+    return { body, sec, quest };
   });
 };
 
-// exports.test = async (values) => {
-//   db.transactions(async (client) => {
-//     const tmp = values.reduce((acc, val, idx) => {
-//       if (idx === 1) {
-//         return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
-//       }
-//       return `${acc},${JSON.stringify(val)}`;
-//     });
-//     const res = await client.query(
-//       'INSERT INTO hola (nombre, testjson) VALUES ($1,$2) RETURNING id;',
-//       [
-//         'req.name',
-//         `[${tmp}]`
-//         // '[{"id":"0","name":"string","value":"0","state":true},{"id":"1","name":"string","value":"0","state":true},{"id":"2","name":"string","value":"0","state":true},{"id":"3","name":"string","value":"0","state":true},{"id":"4","name":"string","value":"0","state":true}]',
-//       ]
-//     );
-//   });
-// };

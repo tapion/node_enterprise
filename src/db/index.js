@@ -16,7 +16,7 @@ module.exports = {
         client.query('COMMIT');
         return result;
       } catch (e) {
-        console.log('Database ERROR!!!' + e);
+        console.log('Database ERROR!!!' , e);
         client.query('ROLLBACK');
       }
     } finally {
