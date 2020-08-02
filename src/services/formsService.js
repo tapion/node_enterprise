@@ -20,6 +20,7 @@ const prepareResponse = (req, obj) => {
     return el;
   });
 };
+
 exports.create = async (req, res) => {
   try {
     const schema = Joi.object({

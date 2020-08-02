@@ -1,5 +1,17 @@
 const db = require('../db');
 
+const createJsonFromArray = (arr) => {
+  if (arr.length > 0) {
+    return arr.reduce((acc, val, idx) => {
+      if (idx === 1) {
+        return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
+      }
+      return `${acc},${JSON.stringify(val)}`;
+    });
+  }
+  return '';
+};
+
 exports.CreateForm = async (body, sec, quest) => {
   return await db.transactions(async (client) => {
     const form = {};
@@ -8,6 +20,7 @@ exports.CreateForm = async (body, sec, quest) => {
       [body.name, body.description, body.state, body.userName]
     );
     form.id = res.rows[0].id;
+    //Sections
     const newSections = await Promise.all(
       sec.map(async (section) => {
         res = await client.query(
@@ -18,30 +31,11 @@ exports.CreateForm = async (body, sec, quest) => {
         return section;
       })
     );
+    //Questions
     const newQuestions = await Promise.all(
       quest.map(async (question) => {
-        let values = '';
-        if (question.source.length > 0) {
-          values = question.source.reduce((acc, val, idx) => {
-            if (idx === 1) {
-              return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
-            }
-            return `${acc},${JSON.stringify(val)}`;
-          });
-        } else {
-          values = '';
-        }
-        let condition = '';
-        if (question.conditions > 0) {
-          condition = question.conditions.reduce((acc, val, idx) => {
-            if (idx === 1) {
-              return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
-            }
-            return `${acc},${JSON.stringify(val)}`;
-          });
-        } else {
-          condition = '';
-        }
+        const values = createJsonFromArray(question.source);
+        const condition = createJsonFromArray(question.conditions);
         const sectionId = newSections.find((el) => el.id == question.idSection)
           .idk;
         res = await client.query(
@@ -83,4 +77,3 @@ exports.CreateForm = async (body, sec, quest) => {
     return { body, sec, quest };
   });
 };
-

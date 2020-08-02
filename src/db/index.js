@@ -18,6 +18,7 @@ module.exports = {
       } catch (e) {
         console.log('Database ERROR!!!' , e);
         client.query('ROLLBACK');
+        throw e;
       }
     } finally {
       client.release();
