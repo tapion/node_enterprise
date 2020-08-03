@@ -77,3 +77,36 @@ exports.CreateForm = async (body, sec, quest) => {
     return { body, sec, quest };
   });
 };
+
+exports.getFormById = async (formId) => {
+  return await db.query(
+    'SELECT id, "name", description, state, user_creation FROM forms WHERE id = $1',
+    [formId]
+  );
+};
+exports.getSectionsByForm = async (formId) => {
+  return await db.query(
+    'SELECT id, "name" as title, state FROM sections WHERE form_id = $1',
+    [formId]
+  );
+};
+exports.getQuestionsByForm = async (formId) => {
+  return await db.query(
+    `SELECT 
+        qu.id,
+        qu.title ,
+        qu.description ,
+        qu."type" ,
+        qu.icon ,
+        qu.isrequired ,
+        qu.section_id ,
+        qu.source_idtable ,
+        qu.source_namesource ,
+        qu.source_values ,
+        qu.conditions 
+    FROM sections sec
+    INNER JOIN questions qu ON qu.section_id = sec.id
+    WHERE sec.form_id = $1`,
+    [formId]
+  );
+};

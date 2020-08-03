@@ -28,7 +28,7 @@ exports.create = async (req, res) => {
       name: Joi.string().required(),
       description: Joi.string().required(),
       state: Joi.boolean().required(),
-      userName: Joi.number().integer().required(),
+      userName: Joi.string().required(),
       elements: Joi.array().items(
         Joi.object({
           id: Joi.number().integer().allow(null).empty(''),
@@ -86,10 +86,90 @@ exports.create = async (req, res) => {
       serverTime: Date.now(),
       data: body,
     });
-  } catch (err) {
+  } catch (e) {
     res.status(500).json({
       message: 'error',
-      body: err.message,
+      body: e.message,
+    });
+  }
+};
+
+const buildElements = (resp) => {
+  // console.log('questionsResponse', resp);
+  return resp.map((el) => {
+    // if (typeof el.conditions === 'object') {
+    //   console.log(
+    //     'source antes ',
+    //     el.conditions,
+    //     typeof el.conditions[0],
+    //     el.conditions.lenght
+    //   );
+    //   console.log('source despues', JSON.parse(el.conditions));
+    // }
+    // console.log('conditions', el.conditions);
+    return {
+      id: el.id,
+      title: el.title,
+      description: el.description ? el.description : '',
+      type: el.type ? el.type : sectionId,
+      isNew: false,
+      icon: el.icon ? el.icon : '',
+      isRequired: el.isrequired ? el.isrequired : false,
+      idSection: el.section_id ? el.section_id : null,
+      idTable: el.source_idtable ? el.source_idtable : null,
+      nameSource: el.source_namesource ? el.source_namesource : null,
+      source:
+        typeof el.source_values === 'object' && el.conditions[0]
+          ? el.source_values
+          : [],
+      conditions:
+        typeof el.conditions === 'object' && el.conditions[0]
+          ? JSON.parse(el.conditions)
+          : [],
+    };
+  });
+};
+
+exports.getForm = async (req, res) => {
+  try {
+    const schema = Joi.object({
+      formId: Joi.number().integer().min(1).required(),
+    });
+    const validate = schema.validate(req.params);
+    if (validate.error) {
+      throw validate.error;
+    }
+    // const tmp = '';
+    // console.log(JSON.parse(tmp));
+    const form = await formModel.getFormById(req.params.formId);
+    const sectionsResponse = await formModel.getSectionsByForm(
+      req.params.formId
+    );
+    const questionsResponse = await formModel.getQuestionsByForm(
+      req.params.formId
+    );
+    const sections = buildElements(sectionsResponse.rows);
+    // console.log('antes funcion', questionsResponse.rows);
+    const questions = buildElements(questionsResponse.rows);
+
+    const objResponse = {
+      id: form.rows[0].id,
+      name: form.rows[0].name,
+      description: form.rows[0].description,
+      state: form.rows[0].state,
+      userName: form.rows[0].user_creation,
+      elements: sections.concat(questions),
+    };
+    res.status(200).json({
+      status: 'success',
+      serverTime: Date.now(),
+      data: objResponse,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(404).json({
+      message: 'error',
+      body: e.message,
     });
   }
 };

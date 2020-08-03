@@ -6,7 +6,14 @@ dotenv.config({ path: './config.env' });
 const pool = new Pool();
 
 module.exports = {
-  query: (text, params) => pool.query(text, params),
+  query: async (text, params) => {
+    try {
+      return await pool.query(text, params);
+    } catch (e) {
+      console.log('Database ERROR!!!', e);
+      throw e;
+    }
+  },
   transactions: async (callback) => {
     const client = await pool.connect();
     try {
@@ -16,7 +23,7 @@ module.exports = {
         client.query('COMMIT');
         return result;
       } catch (e) {
-        console.log('Database ERROR!!!' , e);
+        console.log('Database ERROR!!!', e);
         client.query('ROLLBACK');
         throw e;
       }
