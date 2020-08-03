@@ -34,10 +34,15 @@ exports.CreateForm = async (body, sec, quest) => {
     //Questions
     const newQuestions = await Promise.all(
       quest.map(async (question) => {
-        const values = createJsonFromArray(question.source);
-        const condition = createJsonFromArray(question.conditions);
         if (!question.idSection)
-          throw { message: `All elements must have a sections, no section on element id ${question.id}`};
+          throw {
+            message: `All elements must have a sections, no section on element id ${question.id}`,
+          };
+        if (!question.isNew)
+          throw {
+            message: `All elements must be new, this is a old one id ${question.id}`,
+          };
+        const values = createJsonFromArray(question.source);
         const sectionId = newSections.find((el) => el.id == question.idSection)
           .idk;
         res = await client.query(
@@ -46,7 +51,6 @@ exports.CreateForm = async (body, sec, quest) => {
             ,description
             ,"type"
             , icon
-            , conditions
             , isrequired
             , source_idtable
             , source_namesource
@@ -54,13 +58,12 @@ exports.CreateForm = async (body, sec, quest) => {
             , section_id
             , user_creation
             )
-        VALUES($1,$2, $3, $4, $5,$6,$7,$8,$9,$10,$11) RETURNING id;`,
+        VALUES($1,$2, $3, $4, $5,$6,$7,$8,$9,$10) RETURNING id;`,
           [
             question.title,
             question.description,
             question.type,
             question.icon,
-            `[${condition}]`,
             question.isRequired,
             question.idTable,
             question.nameSource,
@@ -74,6 +77,17 @@ exports.CreateForm = async (body, sec, quest) => {
         return question;
       })
     );
+    //Conditions
+    newQuestions.forEach(async (el, ind, arr) => {
+      el.conditions.forEach((con) => {
+        con.source = arr.find((qu) => qu.id == con.source).idk;
+        con.target = arr.find((qu) => qu.id == con.target).idk;
+      });
+      res = await client.query(
+        'UPDATE questions set conditions = $2 where id = $1',
+        [el.idk, `[${createJsonFromArray(el.conditions)}]`]
+      );
+    });
     body.id = form.id;
     body.questions = newQuestions;
     return { body, sec, quest };
