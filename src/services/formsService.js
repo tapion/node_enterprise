@@ -117,7 +117,7 @@ const buildElements = (resp) => {
           : [],
       conditions:
         typeof el.conditions === 'object' && el.conditions[0]
-          ? JSON.parse(el.conditions)
+          ? el.conditions
           : [],
     };
   });
@@ -133,6 +133,11 @@ exports.getForm = async (req, res) => {
       throw validate.error;
     }
     const form = await formModel.getFormById(req.params.formId);
+    if (form.rowCount === 0) {
+      throw {
+        message: `Not found form id: ${req.params.formId}`,
+      };
+    }
     const sectionsResponse = await formModel.getSectionsByForm(
       req.params.formId
     );
