@@ -36,6 +36,8 @@ exports.CreateForm = async (body, sec, quest) => {
       quest.map(async (question) => {
         const values = createJsonFromArray(question.source);
         const condition = createJsonFromArray(question.conditions);
+        if (!question.idSection)
+          throw { message: `All elements must have a sections, no section on element id ${question.id}`};
         const sectionId = newSections.find((el) => el.id == question.idSection)
           .idk;
         res = await client.query(

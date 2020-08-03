@@ -21,58 +21,62 @@ const prepareResponse = (req, obj) => {
   });
 };
 
+exports.validateForm = (req, res, next, val) => {
+  const schema = Joi.object({
+    id: Joi.number().integer().allow(null).empty(''),
+    name: Joi.string().required(),
+    description: Joi.string().required(),
+    state: Joi.boolean().required(),
+    userName: Joi.string().required(),
+    elements: Joi.array().items(
+      Joi.object({
+        id: Joi.number().integer().allow(null).empty(''),
+        title: Joi.string().required(),
+        description: Joi.string().required(),
+        type: Joi.number().integer().required(),
+        icon: Joi.string(),
+        // value: Joi.string().required(),
+        conditions: Joi.array().items(
+          Joi.object({
+            id: Joi.number().integer().required(),
+            source: Joi.number().integer().required(),
+            sourceProperty: Joi.string().required(),
+            sourceValue: Joi.string().required(),
+            target: Joi.number().integer().required(),
+            targetProperty: Joi.string().required(),
+            targetValue: Joi.string().required(),
+            state: Joi.boolean().required(),
+            // isNew: Joi.boolean().required(),
+          })
+        ),
+        isRequired: Joi.boolean().required(),
+        idSection: Joi.number().integer().allow(null).empty(''),
+        // invalidMessageKey: Joi.string().required(),
+        idTable: Joi.number().integer().allow(null).empty(''),
+        nameSource: Joi.string().allow(null).empty(''),
+        // userName: Joi.number().integer().required(),
+        source: Joi.array().items(
+          Joi.object({
+            id: Joi.number().integer().required(),
+            name: Joi.string().required(),
+            value: Joi.string().required(),
+            state: Joi.boolean().required(),
+            // isNew: Joi.boolean().required(),
+          })
+        ),
+        isNew: Joi.boolean().required(),
+      })
+    ),
+  });
+  const validate = schema.validate(req.body);
+  if (validate.error) {
+    throw validate.error;
+  }
+  next();
+};
+
 exports.create = async (req, res) => {
   try {
-    const schema = Joi.object({
-      id: Joi.number().integer().allow(null).empty(''),
-      name: Joi.string().required(),
-      description: Joi.string().required(),
-      state: Joi.boolean().required(),
-      userName: Joi.string().required(),
-      elements: Joi.array().items(
-        Joi.object({
-          id: Joi.number().integer().allow(null).empty(''),
-          title: Joi.string().required(),
-          description: Joi.string().required(),
-          type: Joi.number().integer().required(),
-          icon: Joi.string(),
-          // value: Joi.string().required(),
-          conditions: Joi.array().items(
-            Joi.object({
-              id: Joi.number().integer().required(),
-              source: Joi.number().integer().required(),
-              sourceProperty: Joi.string().required(),
-              sourceValue: Joi.string().required(),
-              target: Joi.number().integer().required(),
-              targetProperty: Joi.string().required(),
-              targetValue: Joi.string().required(),
-              state: Joi.boolean().required(),
-              // isNew: Joi.boolean().required(),
-            })
-          ),
-          isRequired: Joi.boolean().required(),
-          idSection: Joi.number().integer().allow(null).empty(''),
-          // invalidMessageKey: Joi.string().required(),
-          idTable: Joi.number().integer().allow(null).empty(''),
-          nameSource: Joi.string().allow(null).empty(''),
-          // userName: Joi.number().integer().required(),
-          source: Joi.array().items(
-            Joi.object({
-              id: Joi.number().integer().required(),
-              name: Joi.string().required(),
-              value: Joi.string().required(),
-              state: Joi.boolean().required(),
-              // isNew: Joi.boolean().required(),
-            })
-          ),
-          isNew: Joi.boolean().required(),
-        })
-      ),
-    });
-    const validate = schema.validate(req.body);
-    if (validate.error) {
-      throw validate.error;
-    }
     const { sections, questions } = getSections(req.body);
     const { body, sec, quest } = await formModel.CreateForm(
       req.body,
@@ -81,7 +85,7 @@ exports.create = async (req, res) => {
     );
     prepareResponse(body.elements, sec);
     prepareResponse(body.elements, quest);
-    res.status(200).json({
+    res.status(201).json({
       status: 'success',
       serverTime: Date.now(),
       data: body,
@@ -95,18 +99,7 @@ exports.create = async (req, res) => {
 };
 
 const buildElements = (resp) => {
-  // console.log('questionsResponse', resp);
   return resp.map((el) => {
-    // if (typeof el.conditions === 'object') {
-    //   console.log(
-    //     'source antes ',
-    //     el.conditions,
-    //     typeof el.conditions[0],
-    //     el.conditions.lenght
-    //   );
-    //   console.log('source despues', JSON.parse(el.conditions));
-    // }
-    // console.log('conditions', el.conditions);
     return {
       id: el.id,
       title: el.title,
@@ -139,8 +132,6 @@ exports.getForm = async (req, res) => {
     if (validate.error) {
       throw validate.error;
     }
-    // const tmp = '';
-    // console.log(JSON.parse(tmp));
     const form = await formModel.getFormById(req.params.formId);
     const sectionsResponse = await formModel.getSectionsByForm(
       req.params.formId
@@ -149,21 +140,19 @@ exports.getForm = async (req, res) => {
       req.params.formId
     );
     const sections = buildElements(sectionsResponse.rows);
-    // console.log('antes funcion', questionsResponse.rows);
     const questions = buildElements(questionsResponse.rows);
 
-    const objResponse = {
-      id: form.rows[0].id,
-      name: form.rows[0].name,
-      description: form.rows[0].description,
-      state: form.rows[0].state,
-      userName: form.rows[0].user_creation,
-      elements: sections.concat(questions),
-    };
     res.status(200).json({
       status: 'success',
       serverTime: Date.now(),
-      data: objResponse,
+      data: {
+        id: form.rows[0].id,
+        name: form.rows[0].name,
+        description: form.rows[0].description,
+        state: form.rows[0].state,
+        userName: form.rows[0].user_creation,
+        elements: sections.concat(questions),
+      },
     });
   } catch (e) {
     console.log(e);
