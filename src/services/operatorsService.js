@@ -3,13 +3,15 @@ const formModel = require('../models/formModel');
 
 const buildFormForMobile = async (form) => {
   const sectionsResponse = await formModel.getSectionsByForm(form.id);
-  for (const sec of sectionsResponse.rows) {
-    sec.questions = [];
-    sec.name = sec.title;
-    const questionsBySection = await formModel.getQuestionsBySection(sec.id);
-    sec.questions.push(questionsBySection.rows);
-  }
-  return sectionsResponse.rows;
+  return await Promise.all(
+    sectionsResponse.rows.map(async (sec) => {
+      sec.questions = [];
+      sec.name = sec.title;
+      const questionsBySection = await formModel.getQuestionsBySection(sec.id);
+      sec.questions.push(questionsBySection.rows);
+      return sec;
+    })
+  );
 };
 
 exports.workOrders = async (req, res) => {
@@ -23,13 +25,14 @@ exports.workOrders = async (req, res) => {
     }
     const form = await formModel.getForms(5);
     if (form.rowCount === 0) {
-      throw {
-        message: `Forms not found`,
-      };
+      throw new Error(`Forms not found`);
     }
-    for (const frm of form.rows) {
-      frm.sections = await buildFormForMobile(frm);
-    }
+
+    const formRsp = await Promise.all(
+      form.rows.map(async (frm) => {
+        frm.sections = await buildFormForMobile(frm);
+      })
+    );
     res.status(200).json({
       status: 'success',
       serverTime: Date.now(),
@@ -151,7 +154,7 @@ exports.workOrders = async (req, res) => {
                 division: 'INSTALACION',
               },
             ],
-            forms: form.rows,
+            forms: formRsp,
           },
           {
             id: 126,

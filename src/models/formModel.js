@@ -35,13 +35,13 @@ exports.CreateForm = async (body, sec, quest) => {
     const newQuestions = await Promise.all(
       quest.map(async (question) => {
         if (!question.idSection)
-          throw {
-            message: `All elements must have a sections, no section on element id ${question.id}`,
-          };
+          throw new Error(
+            `All elements must have a sections, no section on element id ${question.id}`
+          );
         if (!question.isNew)
-          throw {
-            message: `All elements must be new, this is a old one id ${question.id}`,
-          };
+          throw new Error(
+            `All elements must be new, this is a old one id ${question.id}`
+          );
         const values = createJsonFromArray(question.source);
         const sectionId = newSections.find((el) => el.id == question.idSection)
           .idk;
