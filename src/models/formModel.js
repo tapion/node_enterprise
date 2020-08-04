@@ -102,7 +102,7 @@ exports.getFormById = async (formId) => {
 };
 exports.getSectionsByForm = async (formId) => {
   return await db.query(
-    'SELECT id, "name" as title, state FROM sections WHERE form_id = $1',
+    'SELECT id, "name" as title, state FROM sections WHERE form_id = $1 ORDER BY id',
     [formId]
   );
 };
@@ -122,7 +122,8 @@ exports.getQuestionsByForm = async (formId) => {
         qu.conditions 
     FROM sections sec
     INNER JOIN questions qu ON qu.section_id = sec.id
-    WHERE sec.form_id = $1`,
+    WHERE sec.form_id = $1
+    ORDER BY qu.id`,
     [formId]
   );
 };

@@ -123,6 +123,15 @@ const buildElements = (resp) => {
   });
 };
 
+const orderSectionsAndQuestions = (sec, que) => {
+  let res = [];
+  sec.forEach((section) => {
+    res.push(section);
+    res = res.concat(que.filter((el) => el.idSection === section.id));
+  });
+  return res;
+};
+
 exports.getForm = async (req, res) => {
   try {
     const schema = Joi.object({
@@ -156,11 +165,10 @@ exports.getForm = async (req, res) => {
         description: form.rows[0].description,
         state: form.rows[0].state,
         userName: form.rows[0].user_creation,
-        elements: sections.concat(questions),
+        elements: orderSectionsAndQuestions(sections, questions),
       },
     });
   } catch (e) {
-    console.log(e);
     res.status(404).json({
       message: 'error',
       body: e.message,
