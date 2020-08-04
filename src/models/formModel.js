@@ -89,7 +89,6 @@ exports.CreateForm = async (body, sec, quest) => {
       );
     });
     body.id = form.id;
-    body.questions = newQuestions;
     return { body, sec, quest };
   });
 };
