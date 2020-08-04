@@ -99,6 +99,13 @@ exports.getFormById = async (formId) => {
     [formId]
   );
 };
+
+exports.getForms = async (limitId) => {
+  return await db.query(
+    'SELECT id, "name", description, state, user_creation FROM forms ORDER BY id DESC LIMIT $1 ',
+    [limitId]
+  );
+};
 exports.getSectionsByForm = async (formId) => {
   return await db.query(
     'SELECT id, "name" as title, state FROM sections WHERE form_id = $1 ORDER BY id',
@@ -124,5 +131,25 @@ exports.getQuestionsByForm = async (formId) => {
     WHERE sec.form_id = $1
     ORDER BY qu.id`,
     [formId]
+  );
+};
+exports.getQuestionsBySection = async (sectionId) => {
+  return await db.query(
+    `SELECT 
+          qu.id,
+          qu.title as text ,
+          qu.description ,
+          qu."type" ,
+          qu.icon ,
+          qu.isrequired ,
+          qu.section_id ,
+          qu.source_idtable ,
+          qu.source_namesource ,
+          qu.source_values as posibilities ,
+          qu.conditions as condition
+      FROM questions qu 
+      WHERE qu.section_id = $1
+      ORDER BY qu.id`,
+    [sectionId]
   );
 };
