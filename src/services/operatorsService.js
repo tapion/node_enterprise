@@ -8,6 +8,9 @@ const buildFormForMobile = async (form) => {
       sec.questions = [];
       sec.name = sec.title;
       const questionsBySection = await formModel.getQuestionsBySection(sec.id);
+      questionsBySection.rows.forEach((qu) => {
+        qu.type = formModel.types.find((el) => el.id === qu.type * 1).mobile;
+      });
       sec.questions.push(questionsBySection.rows);
       return sec;
     })
@@ -31,20 +34,14 @@ exports.workOrders = async (req, res) => {
     const formRsp = await Promise.all(
       form.rows.map(async (frm) => {
         frm.sections = await buildFormForMobile(frm);
+        return frm;
       })
     );
     res.status(200).json({
-      status: 'success',
+      status: 200,
+      message: 'lbl_resp_succes',
       serverTime: Date.now(),
       data: {
-        /*timeSendData: '60',
-          timeSendLocation: '60',
-          startJourney: '1',
-          gpsEnabled: '0',
-          timeSync: '1538599265',
-          version: '1.0',
-          timestampServer: 1591464816, //Viene en el cuerpo de la respuesta es serverTime
-          */
         trackInformation: {
           id: 0,
           secondSendData: 60, //timeSendData

@@ -86,14 +86,15 @@ exports.create = async (req, res) => {
     prepareResponse(body.elements, sec);
     prepareResponse(body.elements, quest);
     res.status(201).json({
-      status: 'success',
+      status: 201,
+      message: 'lbl_resp_succes',
       serverTime: Date.now(),
       data: body,
     });
   } catch (e) {
     res.status(500).json({
-      message: 'error',
-      body: e.message,
+      status: 500,
+      message: e.message,
     });
   }
 };
@@ -157,7 +158,8 @@ exports.getForm = async (req, res) => {
     const questions = buildElements(questionsResponse.rows);
 
     res.status(200).json({
-      status: 'success',
+      status: 200,
+      message: 'lbl_resp_succes',
       serverTime: Date.now(),
       data: {
         id: form.rows[0].id,
@@ -170,8 +172,8 @@ exports.getForm = async (req, res) => {
     });
   } catch (e) {
     res.status(404).json({
-      message: 'error',
-      body: e.message,
+      status: 404,
+      message: e.message,
     });
   }
 };

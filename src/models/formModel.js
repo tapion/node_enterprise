@@ -1,5 +1,17 @@
 const db = require('../db');
 
+exports.types = [
+  { id: 0, front: 'LABEL', mobile: '' },
+  { id: 1, front: 'TEXT', mobile: 'Text' },
+  { id: 2, front: 'RADIOGROUP', mobile: 'Radio' },
+  { id: 3, front: 'CHECKGROUP', mobile: 'CheckTable' },
+  { id: 4, front: 'TEXTAREA', mobile: 'Text' },
+  { id: 5, front: 'COMBOBOX', mobile: 'Pick' },
+  { id: 6, front: 'SECTION', mobile: '' },
+  { id: 7, front: 'NUMBER', mobile: 'Number' },
+  { id: 8, front: 'IMAGE', mobile: 'Photo' },
+];
+
 const createJsonFromArray = (arr) => {
   if (arr.length > 0) {
     return arr.reduce((acc, val, idx) => {
