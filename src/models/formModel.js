@@ -137,6 +137,16 @@ exports.getForms = async (limitId) => {
     [limitId]
   );
 };
+exports.getAllForms = async () => {
+  return await db.query(
+    `SELECT id
+    , "name"
+    , description
+    , state
+    FROM forms 
+    WHERE deleted = FALSE ORDER BY id DESC`
+  );
+};
 exports.getSectionsByForm = async (formId) => {
   return await db.query(
     'SELECT id, "name" as title, state FROM sections WHERE form_id = $1 AND deleted = FALSE ORDER BY id',

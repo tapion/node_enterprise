@@ -149,9 +149,7 @@ exports.getForm = async (req, res) => {
     }
     const form = await formModel.getFormById(req.params.formId);
     if (form.rowCount === 0) {
-      throw {
-        message: `Not found form id: ${req.params.formId}`,
-      };
+      throw new Error(`Not found form id: ${req.params.formId}`);
     }
     const sectionsResponse = await formModel.getSectionsByForm(
       req.params.formId
@@ -174,6 +172,42 @@ exports.getForm = async (req, res) => {
         userName: form.rows[0].user_creation,
         elements: orderSectionsAndQuestions(sections, questions),
       },
+    });
+  } catch (e) {
+    res.status(404).json({
+      status: 404,
+      message: e.message,
+    });
+  }
+};
+exports.getAll = async (req, res) => {
+  try {
+    const form = await formModel.getAllForms();
+    if (form.rowCount === 0) {
+      throw new Error(`Not found forms`);
+    }
+    // const sectionsResponse = await formModel.getSectionsByForm(
+    //   req.params.formId
+    // );
+    // const questionsResponse = await formModel.getQuestionsByForm(
+    //   req.params.formId
+    // );
+    // const sections = buildElements(sectionsResponse.rows);
+    // const questions = buildElements(questionsResponse.rows);
+
+    res.status(200).json({
+      status: 200,
+      message: 'lbl_resp_succes',
+      serverTime: Date.now(),
+      data: form.rows,
+      // {
+      //   id: form.rows[0].id,
+      //   name: form.rows[0].name,
+      //   description: form.rows[0].description,
+      //   state: form.rows[0].state,
+      //   userName: form.rows[0].user_creation,
+      //   elements: orderSectionsAndQuestions(sections, questions),
+      // },
     });
   } catch (e) {
     res.status(404).json({
