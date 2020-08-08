@@ -35,7 +35,9 @@ exports.validateForm = (req, res, next, val) => {
         description: Joi.string().required(),
         type: Joi.number().integer().required(),
         icon: Joi.string(),
-        // value: Joi.string().required(),
+        placeHolder: Joi.string(),
+        value: Joi.string(),
+        isReadOnly: Joi.boolean(),
         conditions: Joi.array().items(
           Joi.object({
             id: Joi.number().integer().required(),
@@ -104,14 +106,17 @@ const buildElements = (resp) => {
     return {
       id: el.id,
       title: el.title,
-      description: el.description ? el.description : '',
-      type: el.type ? el.type : sectionId,
+      description: el.description || '',
+      placeHolder: el.placeholder || '',
+      value: el.value || '',
+      type: el.type || sectionId,
       isNew: false,
       icon: el.icon ? el.icon : '',
       isRequired: el.isrequired ? el.isrequired : false,
-      idSection: el.section_id ? el.section_id : null,
-      idTable: el.source_idtable ? el.source_idtable : null,
-      nameSource: el.source_namesource ? el.source_namesource : null,
+      isReadOnly: el.readonly || false,
+      idSection: el.section_id || null,
+      idTable: el.source_idtable || null,
+      nameSource: el.source_namesource || null,
       source:
         typeof el.source_values === 'object' && el.conditions[0]
           ? el.source_values

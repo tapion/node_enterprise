@@ -13,15 +13,22 @@ exports.types = [
 ];
 
 const createJsonFromArray = (arr) => {
-  if (arr.length > 0) {
-    return arr.reduce((acc, val, idx) => {
-      if (idx === 1) {
-        return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
+  try {
+    if (arr.length > 0) {
+      if (arr.length === 1) {
+        return JSON.stringify(arr[0]);
       }
-      return `${acc},${JSON.stringify(val)}`;
-    });
+      return arr.reduce((acc, val, idx) => {
+        if (idx === 1) {
+          return `${JSON.stringify(acc)},${JSON.stringify(val)}`;
+        }
+        return `${acc},${JSON.stringify(val)}`;
+      });
+    }
+    return '';
+  } catch (e) {
+    throw new Error(e);
   }
-  return '';
 };
 
 exports.CreateForm = async (body, sec, quest) => {
@@ -55,8 +62,12 @@ exports.CreateForm = async (body, sec, quest) => {
             `All elements must be new, this is a old one id ${question.id}`
           );
         const values = createJsonFromArray(question.source);
-        const sectionId = newSections.find((el) => el.id == question.idSection)
-          .idk;
+        const sectionId = newSections.find((el) => el.id == question.idSection);
+        if (!sectionId) {
+          throw new Error(
+            `There isn't an element with id: ${question.idSection} and this is asociated with like a section`
+          );
+        }
         res = await client.query(
           `INSERT INTO questions(
             title
@@ -69,8 +80,11 @@ exports.CreateForm = async (body, sec, quest) => {
             , source_values
             , section_id
             , user_creation
-            )
-        VALUES($1,$2, $3, $4, $5,$6,$7,$8,$9,$10) RETURNING id;`,
+            , placeholder
+            , readonly
+            , defaultvalue
+              )
+        VALUES($1,$2, $3, $4, $5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id;`,
           [
             question.title,
             question.description,
@@ -80,26 +94,31 @@ exports.CreateForm = async (body, sec, quest) => {
             question.idTable,
             question.nameSource,
             `[${values}]`,
-            sectionId,
+            sectionId.idk,
             body.userName,
+            question.placeHolder,
+            question.isReadOnly,
+            question.value,
           ]
         );
         question.idk = res.rows[0].id;
-        question.section_idk = sectionId;
+        question.section_idk = sectionId.idk;
         return question;
       })
     );
     //Conditions
-    newQuestions.forEach(async (el, ind, arr) => {
-      el.conditions.forEach((con) => {
-        con.source = arr.find((qu) => qu.id == con.source).idk;
-        con.target = arr.find((qu) => qu.id == con.target).idk;
-      });
-      res = await client.query(
-        'UPDATE questions set conditions = $2 where id = $1',
-        [el.idk, `[${createJsonFromArray(el.conditions)}]`]
-      );
-    });
+    await Promise.all(
+      newQuestions.map(async (el, ind, arr) => {
+        el.conditions.forEach((con) => {
+          con.source = arr.find((qu) => qu.id == con.source).idk;
+          con.target = arr.find((qu) => qu.id == con.target).idk;
+        });
+        res = await client.query(
+          'UPDATE questions set conditions = $2 where id = $1',
+          [el.idk, `[${createJsonFromArray(el.conditions)}]`]
+        );
+      })
+    );
     body.id = form.id;
     return { body, sec, quest };
   });
@@ -107,20 +126,20 @@ exports.CreateForm = async (body, sec, quest) => {
 
 exports.getFormById = async (formId) => {
   return await db.query(
-    'SELECT id, "name", description, state, user_creation FROM forms WHERE id = $1',
+    'SELECT id, "name", description, state, user_creation FROM forms WHERE id = $1 AND deleted = FALSE',
     [formId]
   );
 };
 
 exports.getForms = async (limitId) => {
   return await db.query(
-    'SELECT id, "name", description, state, user_creation FROM forms ORDER BY id DESC LIMIT $1 ',
+    'SELECT id, "name", description, state, user_creation FROM forms WHERE deleted = FALSE ORDER BY id DESC LIMIT $1 ',
     [limitId]
   );
 };
 exports.getSectionsByForm = async (formId) => {
   return await db.query(
-    'SELECT id, "name" as title, state FROM sections WHERE form_id = $1 ORDER BY id',
+    'SELECT id, "name" as title, state FROM sections WHERE form_id = $1 AND deleted = FALSE ORDER BY id',
     [formId]
   );
 };
@@ -137,10 +156,13 @@ exports.getQuestionsByForm = async (formId) => {
         qu.source_idtable ,
         qu.source_namesource ,
         qu.source_values ,
-        qu.conditions 
+        qu.conditions
+        , qu.placeholder
+        , qu.readonly
+        , qu.defaultvalue as value 
     FROM sections sec
-    INNER JOIN questions qu ON qu.section_id = sec.id
-    WHERE sec.form_id = $1
+    INNER JOIN questions qu ON qu.section_id = sec.id and sec.deleted = false
+    WHERE sec.form_id = $1 AND qu.deleted = FALSE
     ORDER BY qu.id`,
     [formId]
   );
@@ -159,8 +181,11 @@ exports.getQuestionsBySection = async (sectionId) => {
           qu.source_namesource ,
           qu.source_values as posibilities ,
           qu.conditions as condition
-      FROM questions qu 
-      WHERE qu.section_id = $1
+          , qu.placeholder
+          , qu.readonly
+          , qu.defaultvalue as value 
+        FROM questions qu 
+      WHERE qu.section_id = $1 AND qu.deleted = FALSE
       ORDER BY qu.id`,
     [sectionId]
   );
