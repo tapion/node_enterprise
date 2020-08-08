@@ -186,28 +186,11 @@ exports.getAll = async (req, res) => {
     if (form.rowCount === 0) {
       throw new Error(`Not found forms`);
     }
-    // const sectionsResponse = await formModel.getSectionsByForm(
-    //   req.params.formId
-    // );
-    // const questionsResponse = await formModel.getQuestionsByForm(
-    //   req.params.formId
-    // );
-    // const sections = buildElements(sectionsResponse.rows);
-    // const questions = buildElements(questionsResponse.rows);
-
     res.status(200).json({
       status: 200,
       message: 'lbl_resp_succes',
       serverTime: Date.now(),
       data: form.rows,
-      // {
-      //   id: form.rows[0].id,
-      //   name: form.rows[0].name,
-      //   description: form.rows[0].description,
-      //   state: form.rows[0].state,
-      //   userName: form.rows[0].user_creation,
-      //   elements: orderSectionsAndQuestions(sections, questions),
-      // },
     });
   } catch (e) {
     res.status(404).json({
