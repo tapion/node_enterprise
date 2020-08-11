@@ -118,7 +118,7 @@ const buildElements = (resp) => {
       idTable: el.source_idtable || null,
       nameSource: el.source_namesource || null,
       source:
-        typeof el.source_values === 'object' && el.conditions[0]
+        typeof el.source_values === 'object' && el.source_values[0]
           ? el.source_values
           : [],
       conditions:
