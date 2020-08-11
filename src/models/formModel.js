@@ -1,4 +1,10 @@
+const bent = require('bent');
+const dotenv = require('dotenv');
 const db = require('../db');
+
+let previusRequest;
+
+dotenv.config({ path: './config.env' });
 
 exports.types = [
   { id: 0, front: 'LABEL', mobile: '' },
@@ -31,7 +37,64 @@ const createJsonFromArray = (arr) => {
   }
 };
 
+const consumeCatalogs = async (catalog, caller) => {
+  previusRequest = catalog;
+  const response = await caller('/v1/catalog/', {
+    name: catalog.name,
+    status: catalog.status,
+    userName: catalog.userName,
+    description: catalog.name,
+    abbreviation: catalog.value,
+    catalog_id: catalog.father,
+  });
+  return response.data;
+};
+
+const createCatalogs = async (quest, username) => {
+  try {
+    const post = bent(`${process.env.CATALOG_HOST}`, 'POST', 'json', 200);
+    return await Promise.all(
+      quest.map(async (q) => {
+        if (q.nameSource) {
+          q.idTable = await consumeCatalogs(
+            {
+              name: q.nameSource,
+              status: true,
+              userName: username,
+              value: q.nameSource,
+              father: 0,
+            },
+            post
+          );
+          q.source = await Promise.all(
+            q.source.map(async (q1) => {
+              q1.id = await consumeCatalogs(
+                {
+                  name: q1.name,
+                  status: true,
+                  userName: username,
+                  value: q1.value,
+                  father: q.idTable,
+                },
+                post
+              );
+              return q1;
+            })
+          );
+        }
+        return q;
+      })
+    );
+  } catch (e) {
+    const obj = await e.json();
+    obj.message = `${obj.message}, with catalog ${JSON.stringify(
+      previusRequest
+    )} `;
+    throw obj;
+  }
+};
 exports.CreateForm = async (body, sec, quest) => {
+  quest = await createCatalogs(quest, body.userName);
   return await db.transactions(async (client) => {
     const form = {};
     let res = await client.query(
