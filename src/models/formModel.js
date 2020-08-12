@@ -216,8 +216,30 @@ exports.getSectionsByForm = async (formId) => {
     [formId]
   );
 };
+
+const buildSourceFromCatalog = async (idTable) => {
+  try {
+    const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
+    if (idTable) {
+      const response = await caller(`/v1/options/${idTable}`);
+      return response.data.map((res) => {
+        return {
+          id: res.id,
+          name: res.name,
+          value: res.abbreviation,
+          state: res.status,
+        };
+      });
+    }
+    return [];
+  } catch (e) {
+    console.log('Error consumiendo servicio de catalogos', e);
+    throw e;
+  }
+};
+
 exports.getQuestionsByForm = async (formId) => {
-  return await db.query(
+  const questions = await db.query(
     `SELECT 
         qu.id,
         qu.title ,
@@ -239,9 +261,16 @@ exports.getQuestionsByForm = async (formId) => {
     ORDER BY qu.id`,
     [formId]
   );
+  return await Promise.all(
+    questions.rows.map(async (q) => {
+      q.source_values = await buildSourceFromCatalog(q.source_idtable);
+      return q;
+    })
+  );
 };
+
 exports.getQuestionsBySection = async (sectionId) => {
-  return await db.query(
+  const questions = await db.query(
     `SELECT 
           qu.id,
           qu.title as text ,
@@ -261,5 +290,11 @@ exports.getQuestionsBySection = async (sectionId) => {
       WHERE qu.section_id = $1 AND qu.deleted = FALSE
       ORDER BY qu.id`,
     [sectionId]
+  );
+  return await Promise.all(
+    questions.rows.map(async (q) => {
+      q.posibilities = await buildSourceFromCatalog(q.source_idtable);
+      return q;
+    })
   );
 };
