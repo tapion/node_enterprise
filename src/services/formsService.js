@@ -104,22 +104,31 @@ exports.create = async (req, res) => {
   }
 };
 
+const buildSourceFromCatalog = async (idTable) => {
+  try {
+    const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
+    if (idTable) {
+      const response = await caller(`/v1/options/${idTable}`);
+      return response.data.map((res) => {
+        return {
+          id: res.id,
+          name: res.name,
+          value: res.abbreviation,
+          state: res.status,
+        };
+      });
+    }
+    return [];
+  } catch (e) {
+    console.log('Error consumiendo servicio de catalogos', e);
+    throw e;
+  }
+};
+
 const buildElements = async (resp) => {
-  const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
   return await Promise.all(
     resp.map(async (el) => {
-      let source = [];
-      if (el.source_idtable) {
-        const response = await caller(`/v1/options/${el.source_idtable}`);
-        source = response.data.map((res) => {
-          return {
-            id: res.id,
-            name: res.name,
-            value: res.abbreviation,
-            state: res.status,
-          };
-        });
-      }
+      const source = await buildSourceFromCatalog(el.source_idtable);
       return {
         id: el.id,
         title: el.title,
