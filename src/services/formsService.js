@@ -1,6 +1,9 @@
 const Joi = require('@hapi/joi');
+const bent = require('bent');
+const dotenv = require('dotenv');
 const formModel = require('../models/formModel');
 
+dotenv.config({ path: './config.env' });
 const sectionId = 6;
 const getSections = (body) => {
   return {
@@ -101,32 +104,44 @@ exports.create = async (req, res) => {
   }
 };
 
-const buildElements = (resp) => {
-  return resp.map((el) => {
-    return {
-      id: el.id,
-      title: el.title,
-      description: el.description || '',
-      placeHolder: el.placeholder || '',
-      value: el.value || '',
-      type: el.type || sectionId,
-      isNew: false,
-      icon: el.icon ? el.icon : '',
-      isRequired: el.isrequired ? el.isrequired : false,
-      isReadOnly: el.readonly || false,
-      idSection: el.section_id || null,
-      idTable: el.source_idtable || null,
-      nameSource: el.source_namesource || null,
-      source:
-        typeof el.source_values === 'object' && el.source_values[0]
-          ? el.source_values
-          : [],
-      conditions:
-        typeof el.conditions === 'object' && el.conditions[0]
-          ? el.conditions
-          : [],
-    };
-  });
+const buildElements = async (resp) => {
+  const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
+  return await Promise.all(
+    resp.map(async (el) => {
+      let source = [];
+      if (el.source_idtable) {
+        const response = await caller(`/v1/options/${el.source_idtable}`);
+        source = response.data.map((res) => {
+          return {
+            id: res.id,
+            name: res.name,
+            value: res.abbreviation,
+            state: res.status,
+          };
+        });
+      }
+      return {
+        id: el.id,
+        title: el.title,
+        description: el.description || '',
+        placeHolder: el.placeholder || '',
+        value: el.value || '',
+        type: el.type || sectionId,
+        isNew: false,
+        icon: el.icon ? el.icon : '',
+        isRequired: el.isrequired ? el.isrequired : false,
+        isReadOnly: el.readonly || false,
+        idSection: el.section_id || null,
+        idTable: el.source_idtable || null,
+        nameSource: el.source_namesource || null,
+        source: source,
+        conditions:
+          typeof el.conditions === 'object' && el.conditions[0]
+            ? el.conditions
+            : [],
+      };
+    })
+  );
 };
 
 const orderSectionsAndQuestions = (sec, que) => {
@@ -157,8 +172,8 @@ exports.getForm = async (req, res) => {
     const questionsResponse = await formModel.getQuestionsByForm(
       req.params.formId
     );
-    const sections = buildElements(sectionsResponse.rows);
-    const questions = buildElements(questionsResponse.rows);
+    const sections = await buildElements(sectionsResponse.rows);
+    const questions = await buildElements(questionsResponse.rows);
 
     res.status(200).json({
       status: 200,
