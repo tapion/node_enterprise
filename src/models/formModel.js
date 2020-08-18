@@ -298,3 +298,10 @@ exports.getQuestionsBySection = async (sectionId) => {
     })
   );
 };
+exports.associateTypeTask = async (req) => {
+  const res = await db.query(
+    `INSERT INTO forms_type_tasks (task_id, form_id, user_creation) VALUES ($1,$2, $3) RETURNING id;`,
+    [req.taskId, req.formId, req.userId]
+  );
+  return res.rows[0].id;
+};

@@ -196,3 +196,29 @@ exports.getAll = async (req, res) => {
     });
   }
 };
+
+exports.asosiateTypeTask = async (req, res) => {
+  try {
+    const schema = Joi.object({
+      taskId: Joi.number().integer().required(),
+      formId: Joi.number().integer().required(),
+      userId: Joi.string().required(),
+    });
+    const validate = schema.validate(req.body);
+    if (validate.error) {
+      throw validate.error;
+    }
+    req.body.id = await formModel.associateTypeTask(req.body).rows[0].id;
+    res.status(201).json({
+      status: 201,
+      message: 'lbl_resp_succes',
+      serverTime: Date.now(),
+      data: req.body,
+    });
+  } catch (e) {
+    res.status(400).json({
+      status: 400,
+      message: e.message,
+    });
+  }
+};

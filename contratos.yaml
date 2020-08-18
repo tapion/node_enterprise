@@ -1,0 +1,1095 @@
+openapi: 3.0.0
+info:
+  description: |
+    Manage all process about BokyLog
+  version: "1.0.0"
+  title: BokyLog
+servers:
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/innoBoky/bokyLog/1.0.0
+  - description: SwaggerHub API Auto Mocking
+    url: http://ec2-3-91-103-109.compute-1.amazonaws.com:3000
+tags:
+  - name: Operators
+    description: Everything about the employees that are operators
+  - name: Auth
+    description: Get acces token and basic information
+  - name: Roles
+    description: All needed to manage the rols model
+  - name: Notifications
+    description: Manage all about notifications
+  - name: Dashboard
+    description: Information for dashboard
+  - name: Users
+    description: All data about app's users
+  - name: Clients
+    description: All information about the clients of a specific company
+  - name: Zones
+    description: Areas or zones where the company divides its client's location
+  - name: States
+    description: States about the taks that a operator does
+  - name: Work Flows
+    description: All information about the work flow defined by the company
+paths:
+  /operators/{operatorId}/workOrders:
+    get:
+      tags:
+        - Operators
+      summary: Finds work orders by operator
+      description: All work orders that the employee has asigned
+      operationId: workOrdersByOperator
+      parameters:
+        - name: operatorId
+          in: path
+          description: Operator's id, unique for all system
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        # acl:
+                        #   type: array
+                        #   items:
+                        #     $ref: '#/components/schemas/Acl'
+                        trackInformation:
+                          $ref: '#/components/schemas/TrackInformation'
+                        ots:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/WorkOrder'
+                        forms:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/Forms'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/login:
+    post:
+      tags: 
+       - Auth
+      summary: Approve user and return basic user's data
+      description: Give acces to app and return basic user's information
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:                
+                user:
+                  type: string
+                  maxLength: 50
+                password:
+                  type: string
+                  format: password
+        description: Login to system
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserBasicInfo'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /forms/:
+    post:
+      tags: 
+       - Forms
+      summary: Create new forms
+      description: Create all forms that the system use
+      operationId: formsCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Forms'
+        description: Create a form
+        required: true
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Forms'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /forms/{formId}:
+    get:
+      tags: 
+       - Forms
+      summary: Form by id
+      description: Get an specific form 
+      operationId: FormById
+      parameters:
+        - name: formId
+          in: path
+          description: Form id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Forms'
+        '404':
+          $ref: '#/components/responses/Unauthorized'
+  /forms:
+    get:
+      tags: 
+       - Forms
+      summary: All forms
+      description: Get all forms 
+      operationId: FormGetAll
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: 
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        state:
+                          type: boolean
+        '404':
+          $ref: '#/components/responses/Unauthorized'
+  /forms/task-types:
+    post:
+      tags: 
+       - Forms
+      summary: Asociate forms to type of task
+      description: Asociate forms to type of task
+      operationId: formsTypeTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                taksId:
+                  type: integer
+                formId:
+                  type: integer
+                userId:
+                  type: integer
+              required:
+                - taskId
+                - formId
+                - userId
+        description: Create a form
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  taksId:
+                    type: integer
+                  formId:
+                    type: integer
+                  userId:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /roles/{roleId}/permissions:
+    get:
+      tags: 
+       - Roles
+      summary: Get permissions by role
+      description: Get an array of permissions by an specific role
+      operationId: OptionsByRole
+      parameters:
+        - name: roleId
+          in: path
+          description: Role id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Permissions'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/{userId}/notifications:
+    get:
+      tags: 
+       - Users
+      summary: Notifications by user
+      description: Get an array of all notifications that a user has
+      operationId: NotificationsByUser
+      parameters:
+        - name: userId
+          in: path
+          description: User id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notifications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /notifications/{notificationId}:
+    get:
+      tags: 
+       - Notifications
+      summary: Notification specific
+      description: Get information about a notification
+      operationId: NotificationsByUserAndId
+      parameters:
+        - name: notificationId
+          in: path
+          description: Notification id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                      $ref: '#/components/schemas/Notifications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /notifications/:
+    put:
+      tags: 
+       - Notifications
+      summary: Add new notification for a user
+      description: Add new notification for a user
+      operationId: notificationAdd
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notifications'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                      $ref: '#/components/schemas/Notifications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /dashBoard/{initDate}/{finalDate}:
+    get:
+      tags: 
+       - DashBoard
+      summary: Information about orders
+      description: Get information about orders in an specific range of dates
+      operationId: GeneralDashboard
+      parameters:
+        - name: initDate
+          in: path
+          description: Init date
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: finalDate
+          in: path
+          description: Final date
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GeneralOrdersInformation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /clients/:
+    get:
+      tags: 
+       - Clients
+      summary: List of clients
+      operationId: clientsList      
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Clients'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /operators/:
+    get:
+      tags: 
+       - Operators
+      summary: List of all employess that being a operator
+      operationId: operatorsList
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Operators'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /zones/:
+    get:
+      tags: 
+       - Zones
+      summary: List of divisions
+      operationId: divisionsList      
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Areas'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /states/:
+    get:
+      tags: 
+       - States
+      summary: List of states
+      operationId: statesList      
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Status'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /operators/locations/:
+    get:
+      tags: 
+       - Operators
+      summary: List of operator's locations
+      operationId: locationsList
+      parameters:
+        - name: idCompany
+          in: query
+          description: Id de la compañia
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Locations'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /workflow/:
+    get:
+      tags: 
+       - Work Flows
+      summary: N/A
+      description: N/A
+      operationId: workFlowList
+      parameters:
+        - name: dateType
+          in: query
+          description: N/A
+          required: true
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          description: Initial date
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          description: Final date
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: idClient
+          in: query
+          description: Client identifier
+          schema:
+            type: integer
+        - name: idOperator
+          in: query
+          description: Operator identifier
+          schema:
+            type: integer
+        - name: idDivision
+          in: query
+          description: Operator identifier
+          schema:
+            type: integer
+        - name: idState
+          in: query
+          description: State identifier
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorksFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Locations:
+      type: object
+      description: Last operator's location
+      required:
+        - id
+        - title
+        - latitude
+        - longitude
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        latitude:
+          type: integer
+        longitude:
+          type: integer
+    WorksFlow:
+      type: object
+      description: N/A
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        date:
+          type: string
+          format: date-time
+        client:
+          $ref: '#/components/schemas/Clients'
+        operator:
+          $ref: '#/components/schemas/Operators'
+        zone:
+          $ref: '#/components/schemas/Areas'
+        state:
+          $ref: '#/components/schemas/Status'
+    # Divisions:
+    #   type: object
+    #   description: Company areas
+    #   required:
+    #     - id
+    #     - name
+    #   properties:
+    #     id:
+    #       type: integer
+    #     name:
+    #       type: string
+    Operators:
+      type: object
+      description: Company operators 
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    Clients:
+      type: object
+      description: Company clients
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    GeneralOrdersInformation:
+      type: object
+      description: Resume orders by state [Report]
+      required:
+        - totalOrdersReport
+        - processed
+        - inProgress
+        - queued
+      properties:
+        totalOrdersReport:
+          type: integer
+        processed:
+          type: integer
+        inProgress:
+          type: integer
+        queued:
+          type: integer
+    Notifications:
+      type: object
+      description: Notifications of the system
+      required:
+        - shortMessage
+        - typeId
+      properties:
+        id:
+          type: integer
+        unRead:
+          type: boolean
+        typeId:
+          type: integer
+        shortMessage:
+          type: string
+        sentDate:
+          type: string
+          format: date-time
+    Permissions:
+      type: object
+      description: System permissions
+      properties:
+        id:
+          type: integer
+        webType:
+          type: boolean
+          description: N/A
+        level:
+          type: integer
+          description: N/A
+        icon:
+          type: string
+          format: byte
+          description: Base64 image
+        label:
+          type: string
+        resourceAdress:
+          type: string
+          maxLength: 500
+          description: N/A
+        childrenArray:
+          type: array
+          description: N/A
+          items:
+            $ref: '#/components/schemas/Permissions'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    UserBasicInfo:
+      type: object
+      description: Basic user information 
+      properties:
+        id:
+          type: integer
+        user:
+          type: string
+          maxLength: 50
+        fullNameUser:
+          type: string
+          maxLength: 250
+        image:
+          type: string
+          format: byte
+          description: Base64 image
+        lastLogin:
+          type: string
+          format: date-time
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rol'
+    Rol:
+      type: object
+      description: System rol
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    TrackInformation:
+      type: object
+      description: Params for track the user location
+      properties:
+        id:
+          type: integer
+          format: int64
+        secondSendData:
+          type: integer
+        secondSendLocation:
+          type: integer
+        startJourney:
+          type: boolean
+          description: N/A
+        gpsEnabled:
+          type: boolean
+          description: N/A
+        timeSync:
+          type: integer
+          description: N/A
+        phone:
+          type: string
+        version:
+          type: string
+        userStatus:
+          type: integer
+          format: int32
+          description: User Status
+    Acl:
+      type: object
+      description: Service acl
+      properties:
+        id:
+          type: integer
+          format: int64
+        acl:
+          type: string
+        accesLevel:
+          type: integer
+    WorkOrder:
+      type: object
+      description: Work order
+      required:
+        - name
+        - photoUrls
+      properties:
+        id:
+          type: integer
+          format: int64
+        idSubOT:
+          type: integer
+          description: Sub task id, id de la tarea asignada al usuario
+        # idCreateMovil:          
+        #   type: integer
+        #   description: N/A
+        # isMovilCreate:
+        #   type: integer
+        #   description: N/A
+        status:
+          $ref: '#/components/schemas/Status'
+        dateStart:
+          type: string
+          format: date-full
+          description: Fecha de ??
+        dateEnd:
+          type: string
+          format: date-full
+          description: Fecha de ??
+        datail:
+          type: string
+          description: Detalle de la tarea
+          # eliminar
+        # labelOT:
+        #   type: string
+        #   description: N/A
+        idTypeOT:
+          type: integer
+          description: id del Tipo de tarea
+        typeOT:
+          type: string
+          description: Descripcion del tipo de tarea
+        isPriority:
+          type: boolean
+        # colour:
+        #   type: string
+        #   description: Color de ??
+        area:
+          $ref: '#/components/schemas/Areas'
+        place:
+          $ref: '#/components/schemas/Places'
+        priority:
+          $ref: '#/components/schemas/Priorities'
+        # sla:
+        #   $ref: '#/components/schemas/Slas'
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Assets'
+        typesClosure:
+          type: array
+          items:
+            $ref: '#/components/schemas/TypesClosure'
+    TypesClosure:
+      type: object
+      description: Closing types for an issue
+      properties:
+        id:
+          type: integer
+          format: int64
+        closure:
+          type: string
+        firm:
+          type: string
+        division:
+          type: string
+    Assets:
+      type: object
+      description: Stuff to repair
+      properties:
+        id:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-full
+        code:
+          type: string
+        name:
+          type: string
+        detail:
+          type: string
+        img: 
+          type: string
+          format: uri
+        readQR:
+          type: boolean
+        status:
+          type: integer
+    Slas:
+      type: object
+      description: SLA for service
+      properties:
+        id:
+          type: integer
+          format: int64
+        timeMaxSla:
+          type: integer
+          format: int32
+        alertTimeBeforeSla:
+          type: integer
+          format: int32
+        colourSla:
+          type: string
+    Priorities:
+      type: object
+      description: Time notifications for an especific priority
+      properties:
+        id:
+          type: integer
+        priority:
+          type: string
+        alertTimeBefore:
+          type: integer
+          format: int32
+        colourPriority:
+          type: string
+    Places:
+      type: object
+      description: Client ubication
+      properties:
+        id:
+          type: integer
+        place:
+          type: string
+          description: Direccion
+        email:
+          type: string
+          format: email
+          description: Email del jefe?
+        emailcc:
+          type: string
+          format: email
+          description: Email del jefe?
+        adress:
+          type: string
+        latitude:
+          type: string
+        longitude:
+          type: string
+        department:
+          type: string
+        city:
+          type: string
+        client:
+          $ref: '#/components/schemas/Clients'
+    Areas:
+      type: object
+      description: Company areas, catalog
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    Status:
+      type: object      
+      description: States for work orders
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    Catalog:
+      type: object      
+      description: Generic data for all aplication
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        abbreviation:
+          type: string
+        catalog_id:
+          type: integer
+          description: Father's id, 0 for new father catalog
+    Forms:
+      type: object
+      description: Information to show a form
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        state:
+          type: boolean
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormsSections'
+    FormsSections:
+      type: object
+      description: Sections for a form
+      properties:
+        name:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormsQuestions'
+    FormsQuestions:
+      type: object
+      description: Form questions 
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        icon:
+          type: string
+        value:
+          type: string
+        conditions:
+          type: array
+          items:
+            type: string
+        invalidMessageKey:
+          type: string
+        isRequired:
+          type: boolean
+        # El atributo "posibilities" se cambia por source.values
+        source:
+          $ref: '#/components/schemas/FormsQuestionsSources'
+    FormsQuestionsSources:
+      type: object
+      properties:
+        idTable:
+          type: string
+        nameSource:
+          type: string
+        values:
+          type: array
+          items:
+            type: object
+            properties: 
+              id:
+                type: string
+              name:
+                type: string
+              value:
+                type: integer
+              state:
+                type: boolean
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+          description: It must be a label
+        transaccionId:
+          type: integer
+        rowAffected:
+          type: integer
+        serverTime:
+          type: string
+          format: date-time
+        data:
+          type: object
+      required:
+        - status
+        - serverTime
+        - data
+  securitySchemes:
+      api_key:
+        type: apiKey
+        name: api_key
+        in: header
+security: 
+  - api_key: [ ]
