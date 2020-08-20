@@ -196,19 +196,44 @@ exports.getAll = async (req, res) => {
     });
   }
 };
+exports.getAllAssociateTasks = async (req, res) => {
+  try {
+    const form = await formModel.getAllAssociate();
+    if (form.rowCount === 0) {
+      throw new Error(`Not found taks asociated`);
+    }
+    res.status(200).json({
+      status: 200,
+      message: 'lbl_resp_succes',
+      serverTime: Date.now(),
+      data: form.rows,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(404).json({
+      status: 404,
+      message: e.message,
+    });
+  }
+};
 
-exports.asosiateTypeTask = async (req, res) => {
+exports.assosiateTypeTask = async (req, res) => {
   try {
     const schema = Joi.object({
       taskId: Joi.number().integer().required(),
-      formId: Joi.number().integer().required(),
+      forms: Joi.array().items(
+        Joi.object({
+          formId: Joi.number().integer().required(),
+          required: Joi.boolean().required(),
+        })
+      ),
       userId: Joi.string().required(),
     });
     const validate = schema.validate(req.body);
     if (validate.error) {
       throw validate.error;
     }
-    req.body.id = await formModel.associateTypeTask(req.body).rows[0].id;
+    req.body.id = await formModel.associateTypeTask(req.body);
     res.status(201).json({
       status: 201,
       message: 'lbl_resp_succes',
