@@ -196,9 +196,16 @@ exports.getAll = async (req, res) => {
     });
   }
 };
-exports.getAllAssociateTasks = async (req, res) => {
+exports.getFormsByTask = async (req, res) => {
   try {
-    const form = await formModel.getAllAssociate();
+    const schema = Joi.object({
+      idTask: Joi.number().integer().min(1).required(),
+    });
+    const validate = schema.validate(req.params);
+    if (validate.error) {
+      throw validate.error;
+    }
+    const form = await formModel.getFormsByTask(req.params.idTask);
     if (form.rowCount === 0) {
       throw new Error(`Not found taks asociated`);
     }
@@ -206,7 +213,7 @@ exports.getAllAssociateTasks = async (req, res) => {
       status: 200,
       message: 'lbl_resp_succes',
       serverTime: Date.now(),
-      data: form.rows,
+      data: form.rows[0],
     });
   } catch (e) {
     console.log(e);
@@ -220,14 +227,14 @@ exports.getAllAssociateTasks = async (req, res) => {
 exports.assosiateTypeTask = async (req, res) => {
   try {
     const schema = Joi.object({
-      taskId: Joi.number().integer().required(),
+      idTask: Joi.number().integer().required(),
       forms: Joi.array().items(
         Joi.object({
-          formId: Joi.number().integer().required(),
-          required: Joi.boolean().required(),
+          idForm: Joi.number().integer().required(),
+          isRequired: Joi.boolean().required(),
         })
       ),
-      userId: Joi.string().required(),
+      idUser: Joi.string().required(),
     });
     const validate = schema.validate(req.body);
     if (validate.error) {

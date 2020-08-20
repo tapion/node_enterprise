@@ -303,30 +303,25 @@ exports.getQuestionsBySection = async (sectionId) => {
 exports.associateTypeTask = async (req) => {
   const res = await db.query(
     `INSERT INTO "formsTypeTasks" ("taskId", forms, "creationUser") VALUES ($1,$2, $3) RETURNING id;`,
-    [req.taskId, JSON.stringify(req.forms), req.userId]
+    [req.idTask, JSON.stringify(req.forms), req.idUser]
   );
   return res.rows[0].id;
 };
 
 const getCatalogName = async (rows) => {
   try {
-    const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
-    const types = await caller(`/v1/options/${catalogTypeTaks}`);
     return rows.forEach((task) => {
       task.forms = task.forms.map((el) => {
-        const arr = el.split('|');
-        return {
-          formId: arr[0] * 1,
-          formName: arr[1],
-          required: arr[2] === 'true',
-        };
+        if (el) {
+          const arr = el.split('|');
+          return {
+            idForm: arr[0] * 1,
+            nameForm: arr[1],
+            isRequired: arr[2] === 'true',
+          };
+        }
+        return {};
       });
-      const el = types.data.find((type) => type.id === task.taskId);
-      if (el) {
-        task.taskName = el.name || '';
-        task.taskAbbreviation = el.abbreviation || '';
-        task.taskstatus = el.status || '';
-      }
     });
   } catch (e) {
     console.log('Error consumiendo servicio de catalogos', e);
@@ -334,17 +329,17 @@ const getCatalogName = async (rows) => {
   }
 };
 
-exports.getAllAssociate = async () => {
+exports.getFormsByTask = async (taskId) => {
   const associate = await db.query(
     `SELECT ftt.id
-    , ftt."taskId"
-    , array_agg(hola.child->'formId' || '|' || f2."name" || '|' || (hola.child->'required')::TEXT ) AS forms
-    , ftt.state 
+    , ftt."taskId" as "idTask"
+    , array_agg(hola.child->'idForm' || '|' || f2."name" || '|' || (hola.child->'isRequired')::TEXT ) AS forms
     FROM "formsTypeTasks" ftt
     LEFT JOIN LATERAL json_array_elements(ftt.forms) hola(child) ON TRUE
-    LEFT JOIN forms f2 ON f2.id = (hola.child->>'formId')::INTEGER
-    WHERE ftt.forms  IS NOT NULL AND ftt.deleted = false
-    GROUP BY ftt.id`
+    LEFT JOIN forms f2 ON f2.id = (hola.child->>'idForm')::INTEGER
+    WHERE ftt."taskId" = $1 AND ftt.deleted = false
+    GROUP BY ftt.id`,
+    [taskId]
   );
   await getCatalogName(associate.rows);
   return associate;
