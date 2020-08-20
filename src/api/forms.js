@@ -4,7 +4,10 @@ const formService = require('../services/formsService');
 const router = express.Router();
 
 router.route('/task-types').post(formService.assosiateTypeTask);
-router.route('/task-types/:idTask').get(formService.getFormsByTask);
+router
+  .route('/task-types/:idTask')
+  .get(formService.validateTaskId, formService.getFormsByTask)
+  .put(formService.validateTaskId, formService.editFormsByTask);
 
 router
   .route('/')

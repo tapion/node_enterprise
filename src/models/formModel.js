@@ -307,6 +307,15 @@ exports.associateTypeTask = async (req) => {
   );
   return res.rows[0].id;
 };
+exports.updateAssociateTypeTask = async (taskId, req) => {
+  return await db.query(
+    `UPDATE  "formsTypeTasks" set forms = $1
+    , "modificationUser" = $2
+    , "modificationDate" = now() 
+    WHERE "taskId" = $3`,
+    [JSON.stringify(req.forms), req.idUser, taskId]
+  );
+};
 
 const getCatalogName = async (rows) => {
   try {
