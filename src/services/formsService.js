@@ -222,10 +222,12 @@ exports.getFormsByTask = async (req, res) => {
       status: 200,
       message: 'lbl_resp_succes',
       serverTime: Date.now(),
-      data: form.rows[0],
+      data: {
+        idTask: req.params.idTask,
+        forms: form.rows,
+      },
     });
   } catch (e) {
-    console.log(e);
     res.status(404).json({
       status: 404,
       message: e.message,
@@ -249,7 +251,7 @@ exports.assosiateTypeTask = async (req, res) => {
     if (validate.error) {
       throw validate.error;
     }
-    req.body.id = await formModel.associateTypeTask(req.body);
+    await formModel.associateTypeTask(req.body);
     res.status(201).json({
       status: 201,
       message: 'lbl_resp_succes',
@@ -285,6 +287,38 @@ exports.editFormsByTask = async (req, res) => {
       message: 'lbl_resp_succes',
       serverTime: Date.now(),
       data: req.body,
+    });
+  } catch (e) {
+    res.status(400).json({
+      status: 400,
+      message: e.message,
+    });
+  }
+};
+exports.deleteFormsByTask = async (req, res) => {
+  try {
+    let schema = Joi.object({
+      idTask: Joi.number().integer().required(),
+      idForm: Joi.number().integer().required(),
+    });
+    let validate = schema.validate(req.params);
+    if (validate.error) {
+      throw validate.error;
+    }
+    // TODO: MEJORAR CUANDO SE TENGA EL TEMA DE SEGURIDAD
+    schema = Joi.object({
+      idUser: Joi.string().required(),
+    });
+    validate = schema.validate(req.body);
+    if (validate.error) {
+      throw validate.error;
+    }
+    await formModel.deleteAssociateTypeTask(req.params, req.body.idUser);
+    res.status(200).json({
+      status: 200,
+      message: 'lbl_resp_succes',
+      serverTime: Date.now(),
+      data: {},
     });
   } catch (e) {
     res.status(400).json({

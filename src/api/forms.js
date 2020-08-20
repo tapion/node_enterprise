@@ -8,6 +8,9 @@ router
   .route('/task-types/:idTask')
   .get(formService.validateTaskId, formService.getFormsByTask)
   .put(formService.validateTaskId, formService.editFormsByTask);
+router
+  .route('/task-types/:idTask/:idForm')
+  .delete(formService.deleteFormsByTask);
 
 router
   .route('/')

@@ -1,6 +1,9 @@
 {
   "name": "logistics",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=13.0.0"
+  },
   "description": "API for bokyLog app",
   "main": "index.js",
   "scripts": {

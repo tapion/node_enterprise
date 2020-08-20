@@ -301,55 +301,38 @@ exports.getQuestionsBySection = async (sectionId) => {
   );
 };
 exports.associateTypeTask = async (req) => {
-  const res = await db.query(
-    `INSERT INTO "formsTypeTasks" ("taskId", forms, "creationUser") VALUES ($1,$2, $3) RETURNING id;`,
-    [req.idTask, JSON.stringify(req.forms), req.idUser]
+  return await Promise.all(
+    req.forms.map(async (form) => {
+      await db.query(
+        `INSERT INTO "formsTypeTasks" ("taskId", "formId", "creationUser", required) VALUES ($1,$2, $3, $4) RETURNING id;`,
+        [req.idTask, form.idForm, req.idUser, form.isRequired]
+      );
+    })
   );
-  return res.rows[0].id;
 };
 exports.updateAssociateTypeTask = async (taskId, req) => {
-  return await db.query(
-    `UPDATE  "formsTypeTasks" set forms = $1
-    , "modificationUser" = $2
-    , "modificationDate" = now() 
-    WHERE "taskId" = $3`,
-    [JSON.stringify(req.forms), req.idUser, taskId]
-  );
+  await db.query(`DELETE FROM "formsTypeTasks" WHERE "taskId" = $1`, [taskId]);
+  return await this.associateTypeTask({ idTaks: taskId, ...req });
 };
 
-const getCatalogName = async (rows) => {
-  try {
-    return rows.forEach((task) => {
-      task.forms = task.forms.map((el) => {
-        if (el) {
-          const arr = el.split('|');
-          return {
-            idForm: arr[0] * 1,
-            nameForm: arr[1],
-            isRequired: arr[2] === 'true',
-          };
-        }
-        return {};
-      });
-    });
-  } catch (e) {
-    console.log('Error consumiendo servicio de catalogos', e);
-    throw e;
-  }
+exports.deleteAssociateTypeTask = async (params, userId) => {
+  return await db.query(
+    `UPDATE "formsTypeTasks" set state = false
+    , "modificationUser" = $1
+    , "modificationDate" = now() 
+    WHERE "taskId" = $3 AND "formId" = $2`,
+    [userId, params.idForm, params.idTask]
+  );
 };
 
 exports.getFormsByTask = async (taskId) => {
   const associate = await db.query(
-    `SELECT ftt.id
-    , ftt."taskId" as "idTask"
-    , array_agg(hola.child->'idForm' || '|' || f2."name" || '|' || (hola.child->'isRequired')::TEXT ) AS forms
+    `SELECT ftt."formId" 
+    , ftt.required 
     FROM "formsTypeTasks" ftt
-    LEFT JOIN LATERAL json_array_elements(ftt.forms) hola(child) ON TRUE
-    LEFT JOIN forms f2 ON f2.id = (hola.child->>'idForm')::INTEGER
-    WHERE ftt."taskId" = $1 AND ftt.deleted = false
-    GROUP BY ftt.id`,
+    INNER JOIN forms f2 ON f2.id  = ftt."formId" AND f2.deleted = FALSE AND f2.state = TRUE 
+    WHERE ftt."taskId" = $1 AND ftt.deleted = FALSE AND ftt.state = TRUE  `,
     [taskId]
   );
-  await getCatalogName(associate.rows);
   return associate;
 };
