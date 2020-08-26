@@ -329,6 +329,7 @@ exports.getFormsByTask = async (taskId) => {
   const associate = await db.query(
     `SELECT ftt."formId" as "idForm"
     , ftt.required as "isRequired"
+    , f2."name"  as "nameForm"
     FROM "formsTypeTasks" ftt
     INNER JOIN forms f2 ON f2.id  = ftt."formId" AND f2.deleted = FALSE AND f2.state = TRUE 
     WHERE ftt."taskId" = $1 AND ftt.deleted = FALSE AND ftt.state = TRUE  `,
