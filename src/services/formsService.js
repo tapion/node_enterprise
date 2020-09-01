@@ -215,16 +215,13 @@ exports.validateTaskId = (req, res, next) => {
 exports.getFormsByTask = async (req, res) => {
   try {
     const form = await formModel.getFormsByTask(req.params.idTask);
-    if (form.rowCount === 0) {
-      throw new Error(`Not found taks asociated`);
-    }
     res.status(200).json({
       status: 200,
       message: 'lbl_resp_succes',
       serverTime: Date.now(),
       data: {
         idTask: req.params.idTask,
-        forms: form.rows,
+        forms: form.rows || 0,
       },
     });
   } catch (e) {
