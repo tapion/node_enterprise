@@ -311,17 +311,21 @@ exports.associateTypeTask = async (req) => {
   );
 };
 exports.updateAssociateTypeTask = async (taskId, req) => {
-  await db.query(`DELETE FROM "formsTypeTasks" WHERE "taskId" = $1`, [taskId]);
-  return await this.associateTypeTask({ idTaks: taskId, ...req });
+  return await db.query(
+    `UPDATE "formsTypeTasks" 
+      set "modificationDate" = now()
+      , "modificationUser" = $3
+      , required = $4
+       WHERE "taskId" = $1 AND "formId" = $2`,
+    [taskId, req.form.idForm, req.idUser, req.form.isRequired]
+  );
 };
 
 exports.deleteAssociateTypeTask = async (params, userId) => {
   return await db.query(
-    `UPDATE "formsTypeTasks" set state = false
-    , "modificationUser" = $1
-    , "modificationDate" = now() 
-    WHERE "taskId" = $3 AND "formId" = $2`,
-    [userId, params.idForm, params.idTask]
+    `DELETE FROM "formsTypeTasks" 
+    WHERE "taskId" = $2 AND "formId" = $1`,
+    [params.idForm, params.idTask]
   );
 };
 
