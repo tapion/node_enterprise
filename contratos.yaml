@@ -113,7 +113,7 @@ paths:
                     $ref: '#/components/schemas/UserBasicInfo'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /forms/:
+  /forms:
     post:
       tags: 
        - Forms
@@ -141,36 +141,6 @@ paths:
                     $ref: '#/components/schemas/Forms'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /forms/{formId}:
-    get:
-      tags: 
-       - Forms
-      summary: Form by id
-      description: Get an specific form 
-      operationId: FormById
-      parameters:
-        - name: formId
-          in: path
-          description: Form id
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/Forms'
-        '404':
-          $ref: '#/components/responses/Unauthorized'
-  /forms:
     get:
       tags: 
        - Forms
@@ -202,31 +172,21 @@ paths:
                           type: boolean
         '404':
           $ref: '#/components/responses/Unauthorized'
-  /forms/task-types:
-    post:
+  /forms/{formId}:
+    get:
       tags: 
        - Forms
-      summary: Asociate forms to type of task
-      description: Asociate forms to type of task
-      operationId: formsTypeTask
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                taksId:
-                  type: integer
-                formId:
-                  type: integer
-                userId:
-                  type: integer
-              required:
-                - taskId
-                - formId
-                - userId
-        description: Create a form
-        required: true
+      summary: Form by id
+      description: Get an specific form 
+      operationId: FormById
+      parameters:
+        - name: formId
+          in: path
+          description: Form id
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
           description: successful operation
@@ -237,14 +197,203 @@ paths:
                   - $ref: '#/components/schemas/ApiResponse'
                 type: object
                 properties:
-                  id:
-                    type: integer
-                  taksId:
-                    type: integer
-                  formId:
-                    type: integer
-                  userId:
-                    type: integer
+                  data:
+                    $ref: '#/components/schemas/Forms'
+        '404':
+          $ref: '#/components/responses/Unauthorized'
+  /forms/task-types/:
+    post:
+      tags: 
+       - Forms and Task Type
+      summary: Asociate forms to type of task
+      description: Asociate forms to type of task
+      operationId: formsTypeTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idTask:
+                  type: integer
+                forms:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      idForm:
+                        type: integer
+                      isRequired:
+                        type: boolean
+                idUser:
+                  type: string
+              required:
+                - idTask
+                - forms
+                - idUser
+        required: true
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        idTask:
+                          type: integer
+                        forms:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              idForm:
+                                type: integer
+                              isRequired:
+                                type: boolean
+                        idUser:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /forms/task-types/{idTask}:
+    put:
+      tags: 
+       - Forms and Task Type
+      summary: Asociate forms to type of task
+      description: Asociate forms to type of task
+      operationId: formsEditTypeTask
+      parameters:
+        - name: idTask
+          in: path
+          description: Taks Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                form:
+                  type: object
+                  properties:
+                    idForm:
+                      type: integer
+                    isRequired:
+                      type: boolean
+                idUser:
+                  type: string
+              required:
+                - forms
+                - idUser
+        required: true
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                      type: object
+                      properties:
+                        idTask:
+                          type: integer
+                        forms:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              idForm:
+                                type: integer
+                              isRequired:
+                                type: boolean
+                        idUser:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      tags: 
+       - Forms and Task Type
+      summary: Get all associate forms to type of task
+      operationId: formsGetAllTypeTasks
+      parameters:
+        - name: idTask
+          in: path
+          description: Task id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                      type: object
+                      properties:
+                        idTask:
+                          type: integer
+                        forms:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              idForm:
+                                type: integer
+                              isRequired:
+                                type: boolean
+                              nameForm:
+                                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /forms/task-types/{idTask}/{idForm}:  
+    delete:
+      tags: 
+       - Forms and Task Type
+      summary: Delete form from a Type Task
+      operationId: formsDeleteTypeTask
+      parameters:
+        - name: idTask
+          in: path
+          description: Taks Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: idForm
+          in: path
+          description: Form id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
   /roles/{roleId}/permissions:

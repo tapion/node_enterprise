@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
+const dotenv = require('dotenv');
 const operatorRoute = require('./api/operators');
 const authRoute = require('./api/auth');
 const rolsRoute = require('./api/rols');
@@ -12,7 +13,7 @@ const stateRoute = require('./api/states');
 const dashBoardRoute = require('./api/dashboard');
 const workFlowRoute = require('./api/workFlows');
 const formRoute = require('./api/forms');
-const dotenv = require('dotenv');
+const orderRoute = require('./api/orders');
 
 dotenv.config({ path: './config.env' });
 
@@ -33,6 +34,7 @@ app.use('/v1/states/', stateRoute);
 app.use('/v1/dashBoard/', dashBoardRoute);
 app.use('/v1/workFlow/', workFlowRoute);
 app.use('/v1/forms/', formRoute);
+app.use('/v1/orders/', orderRoute);
 
 app.listen(3000, () => {
   console.log('Inicio esto');
