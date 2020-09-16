@@ -248,7 +248,8 @@ exports.workOrders = async (req, res) => {
 
 exports.getAllOperators = (req, res) => {
   res.status(200).json({
-    status: 'success',
+    status: 200,
+    message: 'lbl_resp_succes',
     serverTime: Date.now(),
     data: [
       {
