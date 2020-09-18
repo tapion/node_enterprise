@@ -45,7 +45,10 @@ exports.deleteTypeOrderAndTask = async (req) => {
 exports.getAllTypeOrderAndTask = async (idTypeOrder) => {
   try {
     const tasks = await db.query(
-      `SELECT "taskId" as "idTask",state as status
+      `SELECT "taskId" as "idTask"
+        ,state as status
+        ,state as status
+        ,"orderTypeId" as "idTypeOrder"
         FROM "orderTypeTask"
         WHERE "orderTypeId" = $1 AND deleted = false`,
       [idTypeOrder]
