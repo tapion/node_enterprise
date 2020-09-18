@@ -63,8 +63,8 @@ exports.updateTypeOrderAndTask = async (req, res) => {
       throw validate.error;
     }
     await orderModel.updateTypeOrderAndTask(req.body, req.params.idTypeOrder);
-    res.status(201).json({
-      status: 201,
+    res.status(200).json({
+      status: 200,
       message: 'lbl_resp_succes',
       serverTime: Date.now(),
       data: req.body,
@@ -87,8 +87,8 @@ exports.deleteTypeOrderAndTask = async (req, res) => {
       throw validate.error;
     }
     await orderModel.deleteTypeOrderAndTask(req.params);
-    res.status(201).json({
-      status: 201,
+    res.status(200).json({
+      status: 200,
       message: 'lbl_resp_succes',
       serverTime: Date.now(),
       data: {},
