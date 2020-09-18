@@ -47,8 +47,6 @@ exports.getAllTypeOrderAndTask = async (idTypeOrder) => {
     const tasks = await db.query(
       `SELECT "taskId" as "idTask"
         ,state as status
-        ,state as status
-        ,"orderTypeId" as "idTypeOrder"
         FROM "orderTypeTask"
         WHERE "orderTypeId" = $1 AND deleted = false`,
       [idTypeOrder]

@@ -111,6 +111,7 @@ exports.getAllTypeOrderAndTask = async (req, res) => {
       serverTime: Date.now(),
       data: {
         tasks,
+        idTypeOrder: req.params.idTypeOrder,
       },
     });
   } catch (e) {
