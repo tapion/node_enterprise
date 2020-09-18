@@ -105,11 +105,13 @@ exports.getAllTypeOrderAndTask = async (req, res) => {
     const tasks = await orderModel.getAllTypeOrderAndTask(
       req.params.idTypeOrder
     );
-    res.status(201).json({
-      status: 201,
+    res.status(200).json({
+      status: 200,
       message: 'lbl_resp_succes',
       serverTime: Date.now(),
-      data: tasks,
+      data: {
+        tasks,
+      },
     });
   } catch (e) {
     res.status(500).json({
