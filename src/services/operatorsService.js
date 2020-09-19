@@ -70,6 +70,20 @@ const assignBurnData = (ot) => {
   ot.place.client.id = 111; //QUEMADO
 };
 
+const formsByOrderType = async (typeOrder) => {
+  const form = await formModel.getFormsByOrderType(typeOrder);
+  if (form.rowCount === 0) {
+    throw new Error(`Forms not found`);
+  }
+
+  return await Promise.all(
+    form.rows.map(async (frm) => {
+      frm.sections = await buildFormForMobile(frm);
+      return frm;
+    })
+  );
+};
+
 exports.workOrders = async (req, res) => {
   try {
     const schema = Joi.object({
@@ -106,19 +120,8 @@ exports.workOrders = async (req, res) => {
           },
         };
         assignBurnData(ot);
-        const form = await formModel.getFormsByOrderType(ot.idTypeOT);
-        if (form.rowCount === 0) {
-          throw new Error(`Forms not found`);
-        }
-
-        const formRsp = await Promise.all(
-          form.rows.map(async (frm) => {
-            frm.sections = await buildFormForMobile(frm);
-            return frm;
-          })
-        );
         ot.typesClosure = closeTypes;
-        ot.forms = formRsp;
+        ot.forms = await formsByOrderType(ot.idTypeOT);
         return ot;
       })
     );
