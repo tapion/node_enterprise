@@ -1,5 +1,9 @@
 const Joi = require('@hapi/joi');
 const formModel = require('../models/formModel');
+const operatorModel = require('../models/operatorModel');
+const catalogueModel = require('../models/catalogueModel');
+
+const CTG_CLOSETYPE = 121;
 
 const buildFormForMobile = async (form) => {
   const sectionsResponse = await formModel.getSectionsByForm(form.id);
@@ -26,15 +30,92 @@ exports.workOrders = async (req, res) => {
     if (validate.error) {
       throw validate.error;
     }
-    const form = await formModel.getForms(5);
-    if (form.rowCount === 0) {
-      throw new Error(`Forms not found`);
-    }
+    const otsTmp = await operatorModel.getWorkOrderByOperator(
+      req.params.operatorId
+    );
+    const closeTypesRequest = await catalogueModel.getAllChildByParent(
+      CTG_CLOSETYPE
+    );
+    const closeTypes = closeTypesRequest.rows.map((type) => {
+      return {
+        id: type.id,
+        closure: type.name,
+        firm: '0',
+        division: 'MANTENIMIENTO', //QUEMADO
+      };
+    });
+    const ots = await Promise.all(
+      otsTmp.rows.map(async (ot) => {
+        ot.idSubOt = 1407; //QUEMADO
+        ot.idCreateMovil = 0; //QUEMADO
+        ot.isMovilCreate = 0; //QUEMADO
+        ot.dateStart = 1593981546; //QUEMADO
+        ot.dateEnd = 1593981546; //QUEMADO
+        ot.detail = ''; //QUEMADO
+        //En teoria es catalogo 31 Prioridades?
+        ot.isPriority = 33; //QUEMADO
+        ot.colour = '#ffff00'; //QUEMADO
+        ot.staus = {
+          id: ot.stateId,
+          description: ot.stateDescription,
+        };
+        ot.area = {
+          id: 10, //QUEMADO
+          description: 'MANTENIMIENTO', //QUEMADO
+        };
+        ot.place = {
+          id: 12345, //QUEMADO
+          place: ot.placesId,
+          email: 'muecas@hotmail.com', //QUEMADO
+          emailcc: 'angelosvip@hotmail.com', //QUEMADO
+          direction: 'CARRERA 45B # 96-18', //QUEMADO
+          latitude: '11.0051809', //QUEMADO
+          longitude: '-74.8298796', //QUEMADO
+          department: 'CUNDINAMARCA', //QUEMADO
+          city: 'BOGOTA', //QUEMADO
+          client: {
+            id: 111, //QUEMADO
+            name: ot.clientId,
+          },
+        };
+        ot.priority = {
+          id: 33, //QUEMADO
+          priority: 'Alta', //QUEMADO
+          alertTimeBefore: '10', //QUEMADO
+          colourPriority: '#ffff00', //QUEMADO
+        };
+        ot.sla = {
+          id: 1233, //QUEMADO
+          timeMaxSla: '60', //QUEMADO
+          alertTimeBeforeSla: '10', //QUEMADO
+          colourSla: '#ffff00', //QUEMADO
+        };
+        ot.assets = [
+          {
+            id: 222471, //QUEMADO
+            timestamp: '1591136739', //QUEMADO
+            code: 'SHJJ0866', //QUEMADO
+            name: 'MOTOR XXX', //QUEMADO
+            detail: '', //QUEMADO
+            img: '', //QUEMADO
+            readQR: '0', //QUEMADO
+            status: '0', //QUEMADO
+          },
+        ];
+        const form = await formModel.getFormsByOrderType(ot.idTypeOT);
+        if (form.rowCount === 0) {
+          throw new Error(`Forms not found`);
+        }
 
-    const formRsp = await Promise.all(
-      form.rows.map(async (frm) => {
-        frm.sections = await buildFormForMobile(frm);
-        return frm;
+        const formRsp = await Promise.all(
+          form.rows.map(async (frm) => {
+            frm.sections = await buildFormForMobile(frm);
+            return frm;
+          })
+        );
+        ot.typesClosure = closeTypes;
+        ot.forms = formRsp;
+        return ot;
       })
     );
     res.status(200).json({
@@ -53,189 +134,7 @@ exports.workOrders = async (req, res) => {
           version: '1.0',
           userStatus: 0,
         },
-        acl: [
-          {
-            id: 123,
-            acl: 'acl.ots',
-            accessLevel: '1',
-          },
-          {
-            id: 234,
-            acl: 'acl.mhs',
-            accessLevel: '1',
-          },
-          {
-            id: 345,
-            acl: 'acl.assets',
-            accessLevel: '1',
-          },
-        ],
-        OTs: [
-          {
-            id: 123, //Identificador unico
-            idSubOT: 1407,
-            idCreateMovil: 0,
-            isMovilCreate: 0,
-            /*idStatus: 1,
-              status: 'ASIGNADA',*/
-            status: {
-              id: 1,
-              description: 'ASIGNADA',
-            },
-            dateStart: '1593981546',
-            dateEnd: '1593981546',
-            detail: '',
-            labelOT: '177/1407',
-            idTypeOT: 12,
-            typeOT: 'REPARACION',
-            isPriority: '0',
-            colour: '#ffff00',
-            /*idArea: 10,
-              area: 'MANTENIMIENTO',*/
-            area: {
-              id: 10,
-              description: 'MANTENIMIENTO',
-            },
-            place: {
-              id: 12345,
-              place: 'EDIFICIO SANTA FE',
-              email: 'muecas@hotmail.com',
-              emailcc: 'angelosvip@hotmail.com',
-              direction: 'CARRERA 45B # 96-18',
-              latitude: '11.0051809',
-              longitude: '-74.8298796',
-              department: 'CUNDINAMARCA',
-              city: 'BOGOTA',
-              /*idClient: 111,
-                client: 'LA PISINA',*/
-              client: {
-                id: 111,
-                name: 'LA PISINA',
-              },
-            },
-            priority: {
-              id: 123,
-              priority: 'MEDIA',
-              alertTimeBefore: '10',
-              colourPriority: '#ffff00',
-            },
-            sla: {
-              id: 1233,
-              timeMaxSla: '60',
-              alertTimeBeforeSla: '10',
-              colourSla: '#ffff00',
-            },
-            assets: [
-              {
-                id: 222471,
-                timestamp: '1591136739',
-                code: 'SHJJ0866',
-                name: 'MOTOR XXX',
-                detail: '',
-                img: '',
-                readQR: '0',
-                status: '0',
-              },
-            ],
-            typesClosure: [
-              {
-                id: '1234',
-                closure: 'CUMPLIDA',
-                firm: '0',
-                division: 'MANTENIMIENTO',
-              },
-              {
-                id: '4312',
-                closure: 'CUMPLIDA',
-                firm: '0',
-                division: 'INSTALACION',
-              },
-            ],
-            forms: formRsp,
-          },
-          {
-            id: 126,
-            idSubOT: 517,
-            idCreateMovil: 0,
-            isMovilCreate: 0,
-            /*idStatus: 1,
-              status: 'ASIGNADA',*/
-            status: {
-              id: 1,
-              description: 'ASIGNADA',
-            },
-            dateStart: '1594067946',
-            dateEnd: '1594067946',
-            detail: '',
-            labelOT: '924/517',
-            idTypeOT: 12,
-            typeOT: 'REPARACION',
-            isPriority: '0',
-            colour: '#ffff00',
-            /*idArea: 10,
-              area: 'MANTENIMIENTO',*/
-            area: {
-              id: 10,
-              description: 'MANTENIMIENTO',
-            },
-            place: {
-              id: 123457,
-              place: 'EDIFICIO SANTA FE 2',
-              email: 'muecas@gmail.com',
-              emailcc: 'angelosvip@gmail.com',
-              direction: 'CARRERA 45B # 96-18 SANTA FE',
-              latitude: '11.0051809',
-              longitude: '-74.8298796',
-              department: 'CUNDINAMARCA',
-              city: 'BOGOTA',
-              /*idClient: 111,
-                client: 'LA PISINA',*/
-              client: {
-                id: 111,
-                name: 'LA PISINA',
-              },
-            },
-            priority: {
-              id: 124,
-              priority: 'ALTA',
-              alertTimeBefore: '10',
-              colourPriority: '#ff0d00',
-            },
-            sla: {
-              id: 1233,
-              timeMaxSla: '60',
-              alertTimeBeforeSla: '10',
-              colourSla: '#ff0d00',
-            },
-            assets: [
-              {
-                id: 222472,
-                timestamp: '1591136730',
-                code: 'SHJJ924',
-                name: 'MOTOR XXX2',
-                detail: '',
-                img: '',
-                readQR: '1',
-                status: '0',
-              },
-            ],
-            typesClosure: [
-              {
-                id: '1234',
-                closure: 'CUMPLIDA',
-                firm: '1',
-                division: 'MANTENIMIENTO',
-              },
-              {
-                id: '4312',
-                closure: 'CUMPLIDA',
-                firm: '0',
-                division: 'INSTALACION',
-              },
-            ],
-            forms: formRsp,
-          },
-        ],
+        OTs: ots,
       },
     });
   } catch (e) {

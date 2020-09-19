@@ -396,6 +396,189 @@ paths:
                   - $ref: '#/components/schemas/ApiResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /orders/type-task/:
+    post:
+      tags: 
+       - Orders and Task Type
+      summary: Asociate order to type of task
+      description: Asociate order to type of task
+      operationId: ordersTypeTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idTypeOrder:
+                  type: integer
+                tasks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      idTask:
+                        type: integer
+                      status:
+                        type: boolean
+                idUser:
+                  type: string
+              required:
+                - idTypeOrder
+                - tasks
+                - idUser
+        required: true
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                      type: object
+                      properties:
+                        idTypeOrder:
+                          type: integer
+                        tasks:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              idTask:
+                                type: integer
+                              status:
+                                type: boolean
+                        idUser:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /orders/type-task/{idTypeOrder}:
+    put:
+      tags: 
+       - Orders and Task Type
+      summary: Update order to type of task
+      description: Update order to type of task
+      operationId: ordersEditTypeTask
+      parameters:
+        - name: idTypeOrder
+          in: path
+          description: Order type Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tasks:
+                  type: object
+                  properties:
+                    idTask:
+                      type: integer
+                    status:
+                      type: boolean
+                idUser:
+                  type: string
+              required:
+                - tasks
+                - idUser
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                      type: object
+                      properties:
+                        tasks:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              idTask:
+                                type: integer
+                              status:
+                                type: boolean
+                        idUser:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      tags: 
+       - Orders and Task Type
+      summary: Get all associate forms to type of task
+      operationId: ordersGetAllTypeTasks
+      parameters:
+        - name: idTypeOrder
+          in: path
+          description: Order type task id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                      type: object
+                      properties:
+                        idTypeOrder:
+                          type: integer
+                        tasks:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              idTask:
+                                type: integer
+                              status:
+                                type: boolean
+                              nameTask:
+                                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags: 
+       - Orders and Task Type
+      summary: Delete orders by tasks Type
+      operationId: ordersDeleteTypeTask
+      parameters:
+        - name: idTypeOrder
+          in: path
+          description: Order type taks Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /roles/{roleId}/permissions:
     get:
       tags: 
@@ -914,7 +1097,7 @@ components:
           type: string
     TrackInformation:
       type: object
-      description: Params for track the user location
+      description: Params for track the user location, #BURNDATA
       properties:
         id:
           type: integer

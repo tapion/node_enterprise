@@ -5,7 +5,6 @@ const db = require('../db');
 let previusRequest;
 
 dotenv.config({ path: './config.env' });
-const catalogTypeTaks = 93;
 
 exports.types = [
   { id: 0, front: 'LABEL', mobile: '' },
@@ -195,12 +194,25 @@ exports.getFormById = async (formId) => {
   );
 };
 
-exports.getForms = async (limitId) => {
+exports.getFormsByOrderType = async (orderType) => {
   return await db.query(
-    'SELECT id, "name", description, state, user_creation FROM forms WHERE deleted = FALSE ORDER BY id DESC LIMIT $1 ',
-    [limitId]
+    `SELECT
+        f2.id,
+        f2."name",
+        f2.description,
+        f2.state,
+        f2.user_creation
+      FROM
+        "orderTypeTask" ott
+      INNER JOIN "formsTypeTasks" ftt ON
+        ftt."taskId" = ott."taskId" AND ftt.state = TRUE  AND ftt.deleted = FALSE 
+      INNER JOIN forms f2 ON f2.id = ftt."formId" AND f2.state = TRUE  AND f2.deleted = FALSE 
+      WHERE
+        ott."orderTypeId" = $1 AND ott.state = TRUE AND ott.deleted = FALSE  `,
+    [orderType]
   );
 };
+
 exports.getAllForms = async () => {
   return await db.query(
     `SELECT id
