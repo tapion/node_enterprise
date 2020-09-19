@@ -23,14 +23,11 @@ const buildFormForMobile = async (form) => {
 
 const assignBurnData = (ot) => {
   ot.idSubOt = 1407; //QUEMADO
-  ot.idCreateMovil = 0; //QUEMADO
-  ot.isMovilCreate = 0; //QUEMADO
   ot.dateStart = 1593981546; //QUEMADO
   ot.dateEnd = 1593981546; //QUEMADO
   ot.detail = ''; //QUEMADO
   //En teoria es catalogo 31 Prioridades?
   ot.isPriority = 33; //QUEMADO
-  ot.colour = '#ffff00'; //QUEMADO
   ot.area = {
     id: 10, //QUEMADO
     description: 'MANTENIMIENTO', //QUEMADO
@@ -40,12 +37,6 @@ const assignBurnData = (ot) => {
     priority: 'Alta', //QUEMADO
     alertTimeBefore: '10', //QUEMADO
     colourPriority: '#ffff00', //QUEMADO
-  };
-  ot.sla = {
-    id: 1233, //QUEMADO
-    timeMaxSla: '60', //QUEMADO
-    alertTimeBeforeSla: '10', //QUEMADO
-    colourSla: '#ffff00', //QUEMADO
   };
   ot.assets = [
     {
