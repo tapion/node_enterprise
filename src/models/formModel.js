@@ -202,6 +202,7 @@ exports.getFormsByOrderType = async (orderType) => {
         f2.description,
         f2.state,
         f2.user_creation
+        ,ftt.required 
       FROM
         "orderTypeTask" ott
       INNER JOIN "formsTypeTasks" ftt ON

@@ -113,6 +113,16 @@ exports.workOrders = async (req, res) => {
         assignBurnData(ot);
         ot.typesClosure = closeTypes;
         ot.forms = await formsByOrderType(ot.idTypeOT);
+        ot.typeOT = {
+          id: ot.idTypeOT,
+          type: ot.typeOT,
+          formsRequired: ot.forms
+            .filter((frm) => frm.required)
+            .map((frm) => {
+              return frm.id;
+            }),
+        };
+        delete ot.idTypeOT;
         return ot;
       })
     );
