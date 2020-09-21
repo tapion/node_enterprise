@@ -23,11 +23,15 @@ const buildFormForMobile = async (form) => {
 
 const assignBurnData = (ot) => {
   ot.idSubOt = 1407; //QUEMADO
+  ot.idCreateMovil = 0;
+  ot.isMovilCreate = 0;
   ot.dateStart = 1593981546; //QUEMADO
   ot.dateEnd = 1593981546; //QUEMADO
   ot.detail = ''; //QUEMADO
+  ot.labelOT = '177/1407';
   //En teoria es catalogo 31 Prioridades?
   ot.isPriority = 33; //QUEMADO
+  ot.colour = '#ffff00';
   ot.area = {
     id: 10, //QUEMADO
     description: 'MANTENIMIENTO', //QUEMADO
@@ -37,6 +41,12 @@ const assignBurnData = (ot) => {
     priority: 'Alta', //QUEMADO
     alertTimeBefore: '10', //QUEMADO
     colourPriority: '#ffff00', //QUEMADO
+  };
+  ot.sla = {
+    id: 1233,
+    timeMaxSla: 60,
+    alertTimeBeforeSla: 10,
+    colourSla: '#ffff00',
   };
   ot.assets = [
     {
@@ -142,6 +152,23 @@ exports.workOrders = async (req, res) => {
           version: '1.0', //QUEMADO
           userStatus: 0, //QUEMADO
         },
+        acl: [
+          {
+            id: 123,
+            acl: 'acl.ots',
+            accessLevel: 1,
+          },
+          {
+            id: 234,
+            acl: 'acl.mhs',
+            accessLevel: 1,
+          },
+          {
+            id: 345,
+            acl: 'acl.assets',
+            accessLevel: 1,
+          },
+        ],
         OTs: ots,
       },
     });
