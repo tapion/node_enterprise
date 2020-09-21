@@ -3,9 +3,9 @@ const db = require('../db');
 
 dotenv.config({ path: './config.env' });
 
-exports.getWorkOrderByOperator = async (operatorId) =>{
-    return await db.query(
-        `SELECT 
+exports.getWorkOrderByOperator = async (operatorId) => {
+  return await db.query(
+    `SELECT 
             wo.id
             ,wo."orderTypeId" AS "idTypeOT"
             ,c."name" AS "typeOT"
@@ -17,8 +17,6 @@ exports.getWorkOrderByOperator = async (operatorId) =>{
         INNER JOIN catalogue c ON c.id  = wo."orderTypeId" AND c.catalog_id = 93
         INNER JOIN catalogue c2 ON c2.id  = wo."stateId" 
         WHERE wo."operarioId" = $1`,
-        [operatorId]
-    );
-}
-
-//121
+    [operatorId]
+  );
+};

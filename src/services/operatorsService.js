@@ -9,13 +9,11 @@ const buildFormForMobile = async (form) => {
   const sectionsResponse = await formModel.getSectionsByForm(form.id);
   return await Promise.all(
     sectionsResponse.rows.map(async (sec) => {
-      sec.questions = [];
       sec.name = sec.title;
-      const questionsBySection = await formModel.getQuestionsBySection(sec.id);
-      questionsBySection.forEach((qu) => {
+      sec.questions = await formModel.getQuestionsBySection(sec.id);
+      sec.questions.forEach((qu) => {
         qu.type = formModel.types.find((el) => el.id === qu.type * 1).mobile;
       });
-      sec.questions.push(questionsBySection);
       return sec;
     })
   );
