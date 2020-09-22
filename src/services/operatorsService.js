@@ -20,7 +20,7 @@ const buildFormForMobile = async (form) => {
 };
 
 const assignBurnData = (ot) => {
-  ot.idSubOt = 1407; //QUEMADO
+  //ot.idSubOt = 1407; //QUEMADO
   ot.idCreateMovil = 0;
   ot.isMovilCreate = 0;
   ot.dateStart = 1593981546; //QUEMADO
