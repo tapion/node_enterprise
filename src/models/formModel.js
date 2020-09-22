@@ -194,7 +194,7 @@ exports.getFormById = async (formId) => {
   );
 };
 
-exports.getFormsByOrderType = async (orderType) => {
+exports.getFormsByTaskId = async (taskId) => {
   return await db.query(
     `SELECT
         f2.id,
@@ -204,13 +204,12 @@ exports.getFormsByOrderType = async (orderType) => {
         f2.user_creation
         ,ftt.required 
       FROM
-        "orderTypeTask" ott
-      INNER JOIN "formsTypeTasks" ftt ON
-        ftt."taskId" = ott."taskId" AND ftt.state = TRUE  AND ftt.deleted = FALSE 
+        "formsTypeTasks" ftt
       INNER JOIN forms f2 ON f2.id = ftt."formId" AND f2.state = TRUE  AND f2.deleted = FALSE 
       WHERE
-        ott."orderTypeId" = $1 AND ott.state = TRUE AND ott.deleted = FALSE  `,
-    [orderType]
+        ftt."taskId" = $1 AND ftt.state = TRUE  AND ftt.deleted = FALSE
+        ORDER BY f2."name"  `,
+    [taskId]
   );
 };
 

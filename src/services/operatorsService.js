@@ -69,12 +69,8 @@ const assignBurnData = (ot) => {
   ot.place.client.id = 111; //QUEMADO
 };
 
-const formsByOrderType = async (typeOrder) => {
-  const form = await formModel.getFormsByOrderType(typeOrder);
-  if (form.rowCount === 0) {
-    throw new Error(`Forms not found`);
-  }
-
+const formsByTaskId = async (typeOrder) => {
+  const form = await formModel.getFormsByTaskId(typeOrder);
   return await Promise.all(
     form.rows.map(async (frm) => {
       frm.sections = await buildFormForMobile(frm);
@@ -120,7 +116,7 @@ exports.workOrders = async (req, res) => {
         };
         assignBurnData(ot);
         ot.typesClosure = closeTypes;
-        ot.forms = await formsByOrderType(ot.idTypeOT);
+        ot.forms = await formsByTaskId(ot.taskId);
         ot.typeOT = {
           id: ot.idTypeOT,
           type: ot.typeOT,
