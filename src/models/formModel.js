@@ -37,14 +37,8 @@ const createJsonFromArray = (arr) => {
   }
 };
 
-const consumeCatalogs = async (catalog, caller, del = null) => {
+const consumeCatalogs = async (catalog, caller) => {
   previusRequest = catalog;
-  if (!catalog.value) {
-    del(`/v1/catalog/${catalog.father}`);
-    throw new Error(
-      `Error creating new a catalog: ${catalog.name} doesn't have an abbreviation value`
-    );
-  }
   const response = await caller('/v1/catalog/', {
     name: catalog.name,
     status: catalog.status,
@@ -59,10 +53,16 @@ const consumeCatalogs = async (catalog, caller, del = null) => {
 const createCatalogs = async (quest, username) => {
   try {
     const post = bent(`${process.env.CATALOG_HOST}`, 'POST', 'json', 200);
-    const del = bent(`${process.env.CATALOG_HOST}`, 'DELETE', 'json', 200);
+
     return await Promise.all(
       quest.map(async (q) => {
         if (q.nameSource) {
+          q.source.forEach((ctg) => {
+            if (!ctg.value || !ctg.name)
+              throw new Error(
+                `Error creating new a catalog: ${q.nameSource} has child without value or name, the data is, Name: ${ctg.name} and Value: ${ctg.value}`
+              );
+          });
           q.idTable = await consumeCatalogs(
             {
               name: q.nameSource,
@@ -83,8 +83,7 @@ const createCatalogs = async (quest, username) => {
                   value: q1.value,
                   father: q.idTable,
                 },
-                post,
-                del
+                post
               );
               return q1;
             })
