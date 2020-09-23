@@ -39,6 +39,10 @@ const createJsonFromArray = (arr) => {
 
 const consumeCatalogs = async (catalog, caller) => {
   previusRequest = catalog;
+  if (!catalog.value)
+    throw new Error(
+      `Error creating new a catalog: ${catalog.name} doesn't have an abbreviation value`
+    );
   const response = await caller('/v1/catalog/', {
     name: catalog.name,
     status: catalog.status,
@@ -86,11 +90,14 @@ const createCatalogs = async (quest, username) => {
       })
     );
   } catch (e) {
-    const obj = await e.json();
-    obj.message = `${obj.message}, with catalog ${JSON.stringify(
-      previusRequest
-    )} `;
-    throw obj;
+    if (e.statusCode) {
+      const obj = await e.json();
+      obj.message = `${obj.message}, with catalog ${JSON.stringify(
+        previusRequest
+      )} `;
+      throw obj;
+    }
+    throw e;
   }
 };
 exports.CreateForm = async (body, sec, quest) => {
@@ -307,7 +314,7 @@ exports.getQuestionsBySection = async (sectionId) => {
   );
   return await Promise.all(
     questions.rows.map(async (q) => {
-      q.posibilities = await buildSourceFromCatalog(q.source_idtable);
+      q.possibilities = await buildSourceFromCatalog(q.source_idtable);
       return q;
     })
   );

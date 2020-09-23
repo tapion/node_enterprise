@@ -48,22 +48,18 @@ exports.validateForm = (req, res, next, val) => {
             targetProperty: Joi.string().required(),
             targetValue: Joi.string().required(),
             state: Joi.boolean().required(),
-            // isNew: Joi.boolean().required(),
           })
         ),
         isRequired: Joi.boolean().required(),
         idSection: Joi.number().integer().allow(null).empty(''),
-        // invalidMessageKey: Joi.string().required(),
         idTable: Joi.number().integer().allow(null).empty(''),
         nameSource: Joi.string().allow(null).empty(''),
-        // userName: Joi.number().integer().required(),
         source: Joi.array().items(
           Joi.object({
             id: Joi.number().integer().required(),
             name: Joi.string().required(),
             value: Joi.string().required(),
             state: Joi.boolean().required(),
-            // isNew: Joi.boolean().required(),
           })
         ),
         isNew: Joi.boolean().required(),

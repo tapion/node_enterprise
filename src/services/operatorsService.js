@@ -1,9 +1,10 @@
 const Joi = require('@hapi/joi');
+const dotenv = require('dotenv');
 const formModel = require('../models/formModel');
 const operatorModel = require('../models/operatorModel');
 const catalogueModel = require('../models/catalogueModel');
 
-const CTG_CLOSETYPE = 121;
+dotenv.config({ path: './config.env' });
 
 const buildFormForMobile = async (form) => {
   const sectionsResponse = await formModel.getSectionsByForm(form.id);
@@ -92,7 +93,7 @@ exports.workOrders = async (req, res) => {
       req.params.operatorId
     );
     const closeTypesRequest = await catalogueModel.getAllChildByParent(
-      CTG_CLOSETYPE
+      process.env.CTG_TASKID
     );
     const closeTypes = closeTypesRequest.rows.map((type) => {
       return {

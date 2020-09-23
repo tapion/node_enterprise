@@ -2,8 +2,6 @@ const bent = require('bent');
 const dotenv = require('dotenv');
 const db = require('../db');
 
-const tasksCatalogId = 32;
-
 dotenv.config({ path: './config.env' });
 
 exports.saveTypeOrderAndTask = async (req) => {
@@ -52,7 +50,7 @@ exports.getAllTypeOrderAndTask = async (idTypeOrder) => {
       [idTypeOrder]
     );
     const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
-    const response = await caller(`/v1/options/${tasksCatalogId}`);
+    const response = await caller(`/v1/options/${process.env.CTG_TASKID}`);
     tasks.rows.forEach((task) => {
       const catNameTask = response.data.filter(
         (cTaks) => cTaks.id === task.idTask
