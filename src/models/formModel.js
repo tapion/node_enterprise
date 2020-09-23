@@ -302,7 +302,7 @@ exports.getQuestionsBySection = async (sectionId) => {
           qu.section_id ,
           qu.source_idtable ,
           qu.source_namesource ,
-          qu.source_values as posibilities ,
+          qu.source_values as possibilities ,
           qu.conditions as condition
           , qu.placeholder
           , qu.readonly
