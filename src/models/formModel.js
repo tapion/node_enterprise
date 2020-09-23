@@ -7,7 +7,7 @@ let previusRequest;
 dotenv.config({ path: './config.env' });
 
 exports.types = [
-  { id: 0, front: 'LABEL', mobile: '' },
+  { id: 0, front: 'LABEL', mobile: 'Label' },
   { id: 1, front: 'TEXT', mobile: 'Text' },
   { id: 2, front: 'RADIOGROUP', mobile: 'Radio' },
   { id: 3, front: 'CHECKGROUP', mobile: 'CheckTable' },
