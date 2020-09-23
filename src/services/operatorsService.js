@@ -14,6 +14,12 @@ const buildFormForMobile = async (form) => {
       sec.questions = await formModel.getQuestionsBySection(sec.id);
       sec.questions.forEach((qu) => {
         qu.type = formModel.types.find((el) => el.id === qu.type * 1).mobile;
+        qu.condition.forEach( q => {
+          q.questionId = q.source;
+          q.value = q.sourceValue;
+          delete q.source;
+          delete q.sourceValue;
+        });
       });
       return sec;
     })
