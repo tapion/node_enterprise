@@ -58,9 +58,9 @@ const createCatalogs = async (quest, username) => {
       quest.map(async (q) => {
         if (q.nameSource) {
           q.source.forEach((ctg) => {
-            if (!ctg.value || !ctg.name)
+            if (!ctg.abbreviation || !ctg.name)
               throw new Error(
-                `Error creating new a catalog: ${q.nameSource} has child without value or name, the data is, Name: ${ctg.name} and Value: ${ctg.value}`
+                `Error creating new a catalog: ${q.nameSource} has child without value or name, the data is, Name: ${ctg.name} and Abbreviation: ${ctg.abbreviation}`
               );
           });
           q.idTable = await consumeCatalogs(
@@ -80,7 +80,7 @@ const createCatalogs = async (quest, username) => {
                   name: q1.name,
                   status: true,
                   userName: username,
-                  value: q1.value,
+                  value: q1.abbreviation,
                   father: q.idTable,
                 },
                 post
