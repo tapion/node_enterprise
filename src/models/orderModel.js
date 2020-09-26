@@ -50,6 +50,7 @@ exports.getAllTypeOrderAndTask = async (idTypeOrder) => {
       [idTypeOrder]
     );
     const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
+    //CONTROLAR CUNADO HAY ERROR
     const response = await caller(`/v1/options/${process.env.CTG_TASKID}`);
     tasks.rows.forEach((task) => {
       const catNameTask = response.data.filter(
