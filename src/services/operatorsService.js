@@ -30,8 +30,8 @@ const assignBurnData = (ot) => {
   //ot.idSubOt = 1407; //QUEMADO
   ot.idCreateMovil = 0;
   ot.isMovilCreate = 0;
-  ot.dateStart = 1593981546; //QUEMADO
-  ot.dateEnd = 1593981546; //QUEMADO
+  ot.dateStart = Date.now(); //QUEMADO
+  ot.dateEnd = Date.now(); //QUEMADO
   ot.detail = ''; //QUEMADO
   ot.labelOT = '177/1407';
   //En teoria es catalogo 31 Prioridades?
@@ -189,23 +189,23 @@ exports.getAllOperators = (req, res) => {
     data: [
       {
         id: 12,
-        name: 'Mauricio',
+        name: 'Inspector 1',
       },
       {
         id: 12,
-        name: 'Patron',
+        name: 'Inspector 2',
       },
       {
         id: 12,
-        name: 'Jerson',
+        name: 'Inspector 3',
       },
       {
         id: 12,
-        name: 'Juan',
+        name: 'Inspector 4',
       },
       {
         id: 12,
-        name: 'Miguel',
+        name: 'Inspector 5',
       },
     ],
   });
