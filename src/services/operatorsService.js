@@ -188,23 +188,23 @@ exports.getAllOperators = (req, res) => {
     serverTime: Date.now(),
     data: [
       {
-        id: 35,
+        id: 1,
         name: 'Mauricio',
       },
       {
-        id: 12,
+        id: 1,
         name: 'Patron',
       },
       {
-        id: 11,
+        id: 1,
         name: 'Jerson',
       },
       {
-        id: 56,
+        id: 1,
         name: 'Juan',
       },
       {
-        id: 7,
+        id: 1,
         name: 'Miguel',
       },
     ],

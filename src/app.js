@@ -14,6 +14,8 @@ const dashBoardRoute = require('./api/dashboard');
 const workFlowRoute = require('./api/workFlows');
 const formRoute = require('./api/forms');
 const orderRoute = require('./api/orders');
+const errorHandlerController = require('./services/errorController');
+const AppError = require('./utils/appError');
 
 dotenv.config({ path: './config.env' });
 
@@ -35,6 +37,16 @@ app.use('/v1/dashBoard/', dashBoardRoute);
 app.use('/v1/workFlow/', workFlowRoute);
 app.use('/v1/forms/', formRoute);
 app.use('/v1/orders/', orderRoute);
+app.all('*', (req, res, next) => {
+  next(
+    new AppError(
+      `Can't find the resourse ${req.originalUrl} on the server`,
+      404
+    )
+  );
+});
+
+app.use(errorHandlerController);
 
 app.listen(3000, () => {
   console.log('Inicio esto');
