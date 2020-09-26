@@ -14,7 +14,7 @@ const buildFormForMobile = async (form) => {
       sec.questions = await formModel.getQuestionsBySection(sec.id);
       sec.questions.forEach((qu) => {
         qu.type = formModel.types.find((el) => el.id === qu.type * 1).mobile;
-        qu.condition.forEach( q => {
+        qu.condition.forEach((q) => {
           q.questionId = q.source;
           q.value = q.sourceValue;
           delete q.source;
@@ -30,8 +30,8 @@ const assignBurnData = (ot) => {
   //ot.idSubOt = 1407; //QUEMADO
   ot.idCreateMovil = 0;
   ot.isMovilCreate = 0;
-  ot.dateStart = Date.now(); //QUEMADO
-  ot.dateEnd = Date.now(); //QUEMADO
+  ot.dateStart = parseInt(Date.now() / 1000, 10); //QUEMADO
+  ot.dateEnd = parseInt(Date.now() / 1000, 10); //QUEMADO
   ot.detail = ''; //QUEMADO
   ot.labelOT = '177/1407';
   //En teoria es catalogo 31 Prioridades?
