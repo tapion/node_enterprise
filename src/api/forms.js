@@ -1,5 +1,6 @@
 const express = require('express');
 const formService = require('../services/formsService');
+const authService = require('../services/authService');
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router
 router
   .route('/')
   .post(formService.validateForm, formService.create)
-  .get(formService.getAll);
+  .get(authService.validRoles('User'), formService.getAll);
 router.route('/:formId').get(formService.getForm);
 
 module.exports = router;
