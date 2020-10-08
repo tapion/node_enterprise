@@ -1,40 +1,25 @@
-const Joi = require('@hapi/joi');
+const CognitoExpress = require('cognito-express');
+const AppError = require('../utils/appError');
 
-exports.login = (req, res) => {
-  try {
-    if (req.body.username === 'tapion') {
-      throw { message: 'Usuario muy pro' };
-    }
-    const shema = Joi.object({
-      username: Joi.string().required(),
-      password: Joi.string().required(),
-    });
-    const value = shema.validate(req.body);
-    if (value.error) {
-      throw value.error;
-    }
-    res.status(200).json({
-      status: 'success',
-      serverTime: Date.now(),
-      data: {
-        id: 23,
-        user: 'jaime',
-        fullNameUser: 'Jaime Rodriguez Perez',
-        image:
-          'https://s.gravatar.com/avatar/9bc8b5c0d28781f1aee68703937247c1?s=80',
-        lastLogin: new Date().setDate(new Date().getDate() - 5),
-        roles: [
-          {
-            id: 1,
-            name: 'Operator',
-          },
-        ],
-      },
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: 'error',
-      body: err.message,
-    });
+const cognitoExpress = new CognitoExpress({
+  region: process.env.AUTH_COGNITO_REGION,
+  cognitoUserPoolId: process.env.AUTH_COGNITO_POOLID,
+  tokenUse: process.env.AUTH_LIBRARY_TOKENUSE,
+  tokenExpiration: process.env.AUTH_COGNITO_TKNEXPIRATION,
+});
+
+exports.protect = function (req, res, next) {
+  const accessTokenFromClient = req.headers['access-token'];
+
+  if (!accessTokenFromClient){
+    return next(new AppError('You must send the token', 401));
   }
+
+  cognitoExpress.validate(accessTokenFromClient, function (err, response) {
+    if (err) {
+      return next(new AppError(`Token doesn't valid`, 401));
+    }
+    res.locals.user = response;
+    next();
+  });
 };
