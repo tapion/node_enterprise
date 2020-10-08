@@ -31,7 +31,6 @@ exports.validRoles = (...roles) => {
     roles.forEach((rol) => {
       if (req.authRoles.includes(rol)) {
         find = true;
-        return true;
       }
     });
     if (find) {
