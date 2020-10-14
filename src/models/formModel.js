@@ -103,96 +103,122 @@ const createCatalogs = async (quest, username) => {
     throw e;
   }
 };
+
+const saveForm = async (client, quest, body, sec, parentFormId = null) => {
+  const form = {};
+  let res = await client.query(
+    'INSERT INTO forms ("name", description, state, user_creation,"formIdParent") VALUES ($1,$2,$3,$4,$5) RETURNING id;',
+    [body.name, body.description, body.state, body.userName, parentFormId]
+  );
+  form.id = res.rows[0].id;
+  //Sections
+  const newSections = await Promise.all(
+    sec.map(async (section) => {
+      res = await client.query(
+        'INSERT INTO sections ("name", state, form_id, user_creation) VALUES ($1,$2, $3, $4) RETURNING id;',
+        [section.title, section.isRequired, form.id, body.userName]
+      );
+      section.idk = res.rows[0].id;
+      return section;
+    })
+  );
+  //Questions
+  const newQuestions = await Promise.all(
+    quest.map(async (question) => {
+      if (!question.idSection)
+        throw new Error(
+          `All elements must have a sections, no section on element id ${question.id}`
+        );
+      if (!question.isNew)
+        throw new Error(
+          `All elements must be new, this is a old one id ${question.id}`
+        );
+      const values = createJsonFromArray(question.source);
+      const sectionId = newSections.find((el) => el.id == question.idSection);
+      if (!sectionId) {
+        throw new Error(
+          `There isn't an element with id: ${question.idSection} and this is asociated with like a section`
+        );
+      }
+      res = await client.query(
+        `INSERT INTO questions(
+          title
+          ,description
+          ,"type"
+          , icon
+          , isrequired
+          , source_idtable
+          , source_namesource
+          , source_values
+          , section_id
+          , user_creation
+          , placeholder
+          , readonly
+          , defaultvalue
+            )
+      VALUES($1,$2, $3, $4, $5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id;`,
+        [
+          question.title,
+          question.description,
+          question.type,
+          question.icon,
+          question.isRequired,
+          question.idTable,
+          question.nameSource,
+          `[${values}]`,
+          sectionId.idk,
+          body.userName,
+          question.placeHolder,
+          question.isReadOnly,
+          question.value,
+        ]
+      );
+      question.idk = res.rows[0].id;
+      question.section_idk = sectionId.idk;
+      return question;
+    })
+  );
+  //Conditions
+  await Promise.all(
+    newQuestions.map(async (el, ind, arr) => {
+      el.conditions.forEach((con) => {
+        con.source = arr.find((qu) => qu.id == con.source).idk;
+        con.target = arr.find((qu) => qu.id == con.target).idk;
+      });
+      res = await client.query(
+        'UPDATE questions set conditions = $2 where id = $1',
+        [el.idk, `[${createJsonFromArray(el.conditions)}]`]
+      );
+    })
+  );
+  body.id = form.id;
+  return form.id;
+};
+
 exports.CreateForm = async (body, sec, quest) => {
   quest = await createCatalogs(quest, body.userName);
   return await db.transactions(async (client) => {
-    const form = {};
-    let res = await client.query(
-      'INSERT INTO forms ("name", description, state, user_creation) VALUES ($1,$2,$3, $4) RETURNING id;',
-      [body.name, body.description, body.state, body.userName]
+    await saveForm(client, quest, body, sec);
+    return { body, sec, quest };
+  });
+};
+
+exports.updateForm = async (body, sec, quest, parentFormId) => {
+  quest = await createCatalogs(quest, body.userName);
+  return await db.transactions(async (client) => {
+    await client.query('UPDATE forms set state = false where id = $1', [
+      parentFormId,
+    ]);
+    const formId = await saveForm(client, quest, body, sec, parentFormId);
+    await client.query(
+      `INSERT INTO "formsTypeTasks" ("taskId", "formId" ,required, "creationUser" )
+      SELECT "taskId", $1, required, $2 FROM "formsTypeTasks" WHERE "formId" = $3 `,
+      [formId, body.userName, parentFormId]
     );
-    form.id = res.rows[0].id;
-    //Sections
-    const newSections = await Promise.all(
-      sec.map(async (section) => {
-        res = await client.query(
-          'INSERT INTO sections ("name", state, form_id, user_creation) VALUES ($1,$2, $3, $4) RETURNING id;',
-          [section.title, section.isRequired, form.id, body.userName]
-        );
-        section.idk = res.rows[0].id;
-        return section;
-      })
+    await client.query(
+      `UPDATE "formsTypeTasks" set state = false WHERE "formId" = $1 `,
+      [parentFormId]
     );
-    //Questions
-    const newQuestions = await Promise.all(
-      quest.map(async (question) => {
-        if (!question.idSection)
-          throw new Error(
-            `All elements must have a sections, no section on element id ${question.id}`
-          );
-        if (!question.isNew)
-          throw new Error(
-            `All elements must be new, this is a old one id ${question.id}`
-          );
-        const values = createJsonFromArray(question.source);
-        const sectionId = newSections.find((el) => el.id == question.idSection);
-        if (!sectionId) {
-          throw new Error(
-            `There isn't an element with id: ${question.idSection} and this is asociated with like a section`
-          );
-        }
-        res = await client.query(
-          `INSERT INTO questions(
-            title
-            ,description
-            ,"type"
-            , icon
-            , isrequired
-            , source_idtable
-            , source_namesource
-            , source_values
-            , section_id
-            , user_creation
-            , placeholder
-            , readonly
-            , defaultvalue
-              )
-        VALUES($1,$2, $3, $4, $5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id;`,
-          [
-            question.title,
-            question.description,
-            question.type,
-            question.icon,
-            question.isRequired,
-            question.idTable,
-            question.nameSource,
-            `[${values}]`,
-            sectionId.idk,
-            body.userName,
-            question.placeHolder,
-            question.isReadOnly,
-            question.value,
-          ]
-        );
-        question.idk = res.rows[0].id;
-        question.section_idk = sectionId.idk;
-        return question;
-      })
-    );
-    //Conditions
-    await Promise.all(
-      newQuestions.map(async (el, ind, arr) => {
-        el.conditions.forEach((con) => {
-          con.source = arr.find((qu) => qu.id == con.source).idk;
-          con.target = arr.find((qu) => qu.id == con.target).idk;
-        });
-        res = await client.query(
-          'UPDATE questions set conditions = $2 where id = $1',
-          [el.idk, `[${createJsonFromArray(el.conditions)}]`]
-        );
-      })
-    );
-    body.id = form.id;
     return { body, sec, quest };
   });
 };

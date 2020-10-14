@@ -96,6 +96,37 @@ exports.create = async (req, res) => {
     });
   }
 };
+exports.updateForm = async (req, res) => {
+  try {
+    const schema = Joi.object({
+      formId: Joi.number().integer().min(1).required(),
+    });
+    const validate = schema.validate(req.params);
+    if (validate.error) {
+      throw validate.error;
+    }
+    const { sections, questions } = getSections(req.body);
+    const { body, sec, quest } = await formModel.updateForm(
+      req.body,
+      sections,
+      questions,
+      req.params.formId
+    );
+    prepareResponse(body.elements, sec);
+    prepareResponse(body.elements, quest);
+    res.status(201).json({
+      status: 201,
+      message: 'lbl_resp_succes',
+      serverTime: Date.now(),
+      data: body,
+    });
+  } catch (e) {
+    res.status(500).json({
+      status: 500,
+      message: e.message,
+    });
+  }
+};
 
 const buildElements = (resp) => {
   return resp.map((el) => {

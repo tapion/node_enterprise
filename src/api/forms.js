@@ -16,6 +16,9 @@ router
   .route('/')
   .post(formService.validateForm, formService.create)
   .get(formService.getAll);
-router.route('/:formId').get(formService.getForm);
+router
+  .route('/:formId')
+  .put(formService.validateForm, formService.updateForm)
+  .get(formService.getForm);
 
 module.exports = router;
