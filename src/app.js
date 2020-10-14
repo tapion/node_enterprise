@@ -47,6 +47,6 @@ app.all('*', (req, res, next) => {
 
 app.use(errorHandlerController);
 
-app.listen(3000, () => {
+app.listen(process.env.APP_PORT, () => {
   console.log('Inicio esto');
 });
