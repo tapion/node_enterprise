@@ -13,19 +13,21 @@ const dashBoardRoute = require('./api/dashboard');
 const workFlowRoute = require('./api/workFlows');
 const formRoute = require('./api/forms');
 const orderRoute = require('./api/orders');
-const authervice = require('./services/authService');
+// const authervice = require('./services/authService');
+const authervice = require('./services/authCognito');
 const errorHandlerController = require('./services/errorController');
 const AppError = require('./utils/appError');
 
 dotenv.config({ path: './config.env' });
 
 const app = express();
-
+// const test = authervice.getVerifyMiddleware();
 app.use(cors());
 app.options('*', cors());
 app.use(compression());
 app.use(express.json());
-app.use(authervice.protect);
+// app.use(authervice.protect);
+app.use(authervice.getVerifyMiddleware());
 app.use('/v1/operators/', operatorRoute);
 app.use('/v1/roles/', rolsRoute);
 app.use('/v1/notifications/', notificationsRoute);
