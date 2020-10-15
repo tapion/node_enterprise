@@ -24,7 +24,7 @@ app.use(cors());
 app.options('*', cors());
 app.use(compression());
 app.use(express.json());
-app.use(authervice.getVerifyMiddleware());
+// app.use(authervice.getVerifyMiddleware());
 app.use('/v1/operators/', operatorRoute);
 app.use('/v1/roles/', rolsRoute);
 app.use('/v1/notifications/', notificationsRoute);
@@ -48,5 +48,5 @@ app.all('*', (req, res, next) => {
 app.use(errorHandlerController);
 
 app.listen(process.env.APP_PORT, () => {
-  console.log('Inicio esto');
+  console.log('Inicio esto en puerto '.process.env.APP_PORT);
 });
