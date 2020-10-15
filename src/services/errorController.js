@@ -1,5 +1,5 @@
 const sendDev = (err, res) => {
-  res.status(err.status).json({
+  res.status(err.statusCode).json({
     status: err.status,
     message: err.message,
     description: err.description,

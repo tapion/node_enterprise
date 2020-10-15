@@ -379,7 +379,7 @@ exports.deleteAssociateTypeTask = async (params, userId) => {
 
 exports.deleteForm = async (params, userId) => {
   return await db.query(
-    `UPDATE forms set deleted = true
+    `UPDATE forms set deleted = true, modification = now()
     WHERE id = $1`,
     [params.formId]
   );

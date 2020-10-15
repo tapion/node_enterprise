@@ -1,5 +1,6 @@
 const Joi = require('@hapi/joi');
 const formModel = require('../models/formModel');
+const wrapAsyncFn = require('../utils/wrapAsyncFunction');
 
 const sectionId = 6;
 const getSections = (body) => {
@@ -73,84 +74,64 @@ exports.validateForm = (req, res, next, val) => {
   next();
 };
 
-exports.create = async (req, res) => {
-  try {
-    const { sections, questions } = getSections(req.body);
-    const { body, sec, quest } = await formModel.CreateForm(
-      req.body,
-      sections,
-      questions
-    );
-    prepareResponse(body.elements, sec);
-    prepareResponse(body.elements, quest);
-    res.status(201).json({
-      status: 201,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: body,
-    });
-  } catch (e) {
-    res.status(500).json({
-      status: 500,
-      message: e.message,
-    });
-  }
-};
-exports.updateForm = async (req, res) => {
-  try {
-    const schema = Joi.object({
-      formId: Joi.number().integer().min(1).required(),
-    });
-    const validate = schema.validate(req.params);
-    if (validate.error) {
-      throw validate.error;
-    }
-    const { sections, questions } = getSections(req.body);
-    const { body, sec, quest } = await formModel.updateForm(
-      req.body,
-      sections,
-      questions,
-      req.params.formId
-    );
-    prepareResponse(body.elements, sec);
-    prepareResponse(body.elements, quest);
-    res.status(201).json({
-      status: 201,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: body,
-    });
-  } catch (e) {
-    res.status(500).json({
-      status: 500,
-      message: e.message,
-    });
-  }
-};
+exports.create = wrapAsyncFn(async (req, res) => {
+  const { sections, questions } = getSections(req.body);
+  const { body, sec, quest } = await formModel.CreateForm(
+    req.body,
+    sections,
+    questions
+  );
+  prepareResponse(body.elements, sec);
+  prepareResponse(body.elements, quest);
+  res.status(201).json({
+    status: 201,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: body,
+  });
+});
 
-exports.deleteForm = async (req, res) => {
-  try {
-    const schema = Joi.object({
-      formId: Joi.number().integer().min(1).required(),
-    });
-    const validate = schema.validate(req.params);
-    if (validate.error) {
-      throw validate.error;
-    }
-    await formModel.deleteForm(req.params, '@pendingToken');
-    res.status(200).json({
-      status: 200,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: {},
-    });
-  } catch (e) {
-    res.status(400).json({
-      status: 400,
-      message: e.message,
-    });
+exports.updateForm = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    formId: Joi.number().integer().min(1).required(),
+  });
+  const validate = schema.validate(req.params);
+  if (validate.error) {
+    throw validate.error;
   }
-};
+  const { sections, questions } = getSections(req.body);
+  const { body, sec, quest } = await formModel.updateForm(
+    req.body,
+    sections,
+    questions,
+    req.params.formId
+  );
+  prepareResponse(body.elements, sec);
+  prepareResponse(body.elements, quest);
+  res.status(201).json({
+    status: 201,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: body,
+  });
+});
+
+exports.deleteForm = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    formId: Joi.number().integer().min(1).required(),
+  });
+  const validate = schema.validate(req.params);
+  if (validate.error) {
+    throw validate.error;
+  }
+  await formModel.deleteForm(req.params, '@pendingToken');
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: {},
+  });
+});
 
 const buildElements = (resp) => {
   return resp.map((el) => {
@@ -186,67 +167,52 @@ const orderSectionsAndQuestions = (sec, que) => {
   return res;
 };
 
-exports.getForm = async (req, res) => {
-  try {
-    const schema = Joi.object({
-      formId: Joi.number().integer().min(1).required(),
-    });
-    const validate = schema.validate(req.params);
-    if (validate.error) {
-      throw validate.error;
-    }
-    const form = await formModel.getFormById(req.params.formId);
-    if (form.rowCount === 0) {
-      throw new Error(`Not found form id: ${req.params.formId}`);
-    }
-    const sectionsResponse = await formModel.getSectionsByForm(
-      req.params.formId
-    );
-    const questionsResponse = await formModel.getQuestionsByForm(
-      req.params.formId
-    );
-    const sections = buildElements(sectionsResponse.rows);
-    const questions = buildElements(questionsResponse);
+exports.getForm = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    formId: Joi.number().integer().min(1).required(),
+  });
+  const validate = schema.validate(req.params);
+  if (validate.error) {
+    throw validate.error;
+  }
+  const form = await formModel.getFormById(req.params.formId);
+  if (form.rowCount === 0) {
+    throw new Error(`Not found form id: ${req.params.formId}`);
+  }
+  const sectionsResponse = await formModel.getSectionsByForm(req.params.formId);
+  const questionsResponse = await formModel.getQuestionsByForm(
+    req.params.formId
+  );
+  const sections = buildElements(sectionsResponse.rows);
+  const questions = buildElements(questionsResponse);
 
-    res.status(200).json({
-      status: 200,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: {
-        id: form.rows[0].id,
-        name: form.rows[0].name,
-        description: form.rows[0].description,
-        state: form.rows[0].state,
-        userName: form.rows[0].user_creation,
-        elements: orderSectionsAndQuestions(sections, questions),
-      },
-    });
-  } catch (e) {
-    res.status(404).json({
-      status: 404,
-      message: e.message,
-    });
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: {
+      id: form.rows[0].id,
+      name: form.rows[0].name,
+      description: form.rows[0].description,
+      state: form.rows[0].state,
+      userName: form.rows[0].user_creation,
+      elements: orderSectionsAndQuestions(sections, questions),
+    },
+  });
+});
+
+exports.getAll = wrapAsyncFn(async (req, res) => {
+  const form = await formModel.getAllForms();
+  if (form.rowCount === 0) {
+    throw new Error(`Not found forms`);
   }
-};
-exports.getAll = async (req, res) => {
-  try {
-    const form = await formModel.getAllForms();
-    if (form.rowCount === 0) {
-      throw new Error(`Not found forms`);
-    }
-    res.status(200).json({
-      status: 200,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: form.rows,
-    });
-  } catch (e) {
-    res.status(404).json({
-      status: 404,
-      message: e.message,
-    });
-  }
-};
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: form.rows,
+  });
+});
 
 exports.validateTaskId = (req, res, next) => {
   const schema = Joi.object({
@@ -263,113 +229,87 @@ exports.validateTaskId = (req, res, next) => {
   next();
 };
 
-exports.getFormsByTask = async (req, res) => {
-  try {
-    const form = await formModel.getFormsByTask(req.params.idTask);
-    res.status(200).json({
-      status: 200,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: {
-        idTask: req.params.idTask,
-        forms: form.rows || 0,
-      },
-    });
-  } catch (e) {
-    res.status(404).json({
-      status: 404,
-      message: e.message,
-    });
-  }
-};
+exports.getFormsByTask = wrapAsyncFn(async (req, res) => {
+  const form = await formModel.getFormsByTask(req.params.idTask);
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: {
+      idTask: req.params.idTask,
+      forms: form.rows || 0,
+    },
+  });
+});
 
-exports.assosiateTypeTask = async (req, res) => {
-  try {
-    const schema = Joi.object({
-      idTask: Joi.number().integer().required(),
-      forms: Joi.array().items(
-        Joi.object({
-          idForm: Joi.number().integer().required(),
-          isRequired: Joi.boolean().required(),
-        })
-      ),
-      idUser: Joi.string().required(),
-    });
-    const validate = schema.validate(req.body);
-    if (validate.error) {
-      throw validate.error;
-    }
-    await formModel.associateTypeTask(req.body);
-    res.status(201).json({
-      status: 201,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: req.body,
-    });
-  } catch (e) {
-    res.status(400).json({
-      status: 400,
-      message: e.message,
-    });
-  }
-};
-exports.editFormsByTask = async (req, res) => {
-  try {
-    const schema = Joi.object({
-      form: Joi.object({
+exports.assosiateTypeTask = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    idTask: Joi.number().integer().required(),
+    forms: Joi.array().items(
+      Joi.object({
         idForm: Joi.number().integer().required(),
         isRequired: Joi.boolean().required(),
-      }),
-      idUser: Joi.string().required(),
-    });
-    const validate = schema.validate(req.body);
-    if (validate.error) {
-      throw validate.error;
-    }
-    req.body.idTask = req.params.idTask * 1;
-    await formModel.updateAssociateTypeTask(req.params.idTask, req.body);
-    res.status(200).json({
-      status: 200,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: req.body,
-    });
-  } catch (e) {
-    res.status(400).json({
-      status: 400,
-      message: e.message,
-    });
+      })
+    ),
+    idUser: Joi.string().required(),
+  });
+  const validate = schema.validate(req.body);
+  if (validate.error) {
+    throw validate.error;
   }
-};
-exports.deleteFormsByTask = async (req, res) => {
-  try {
-    const schema = Joi.object({
-      idTask: Joi.number().integer().required(),
+  await formModel.associateTypeTask(req.body);
+  res.status(201).json({
+    status: 201,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: req.body,
+  });
+});
+
+exports.editFormsByTask = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    form: Joi.object({
       idForm: Joi.number().integer().required(),
-    });
-    const validate = schema.validate(req.params);
-    if (validate.error) {
-      throw validate.error;
-    }
-    // TODO: MEJORAR CUANDO SE TENGA EL TEMA DE SEGURIDAD
-    // schema = Joi.object({
-    //   idUser: Joi.string().required(),
-    // });
-    // validate = schema.validate(req.body);
-    // if (validate.error) {
-    //   throw validate.error;
-    // }
-    await formModel.deleteAssociateTypeTask(req.params, '@pendingToken');
-    res.status(200).json({
-      status: 200,
-      message: 'lbl_resp_succes',
-      serverTime: Date.now(),
-      data: {},
-    });
-  } catch (e) {
-    res.status(400).json({
-      status: 400,
-      message: e.message,
-    });
+      isRequired: Joi.boolean().required(),
+    }),
+    idUser: Joi.string().required(),
+  });
+  const validate = schema.validate(req.body);
+  if (validate.error) {
+    throw validate.error;
   }
-};
+  req.body.idTask = req.params.idTask * 1;
+  await formModel.updateAssociateTypeTask(req.params.idTask, req.body);
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: req.body,
+  });
+});
+
+exports.deleteFormsByTask = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    idTask: Joi.number().integer().required(),
+    idForm: Joi.number().integer().required(),
+  });
+  const validate = schema.validate(req.params);
+  if (validate.error) {
+    throw validate.error;
+  }
+  // TODO: MEJORAR CUANDO SE TENGA EL TEMA DE SEGURIDAD
+  // schema = Joi.object({
+  //   idUser: Joi.string().required(),
+  // });
+  // validate = schema.validate(req.body);
+  // if (validate.error) {
+  //   throw validate.error;
+  // }
+  await formModel.deleteAssociateTypeTask(req.params, '@pendingToken');
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: {},
+  });
+});
