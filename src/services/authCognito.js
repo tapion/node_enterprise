@@ -148,17 +148,17 @@ function _verifyProm(pems, auth) {
         // Verify the client id matches what we expect. Will be in either the aud or the client_id claim depending on whether it's an id or access token.
         const clientId = decodedAndVerified.aud || decodedAndVerified.client_id;
         // console.log(clientId, process.env.AUTH_COGNITO_CLIENTID);
-        if (clientId !== process.env.AUTH_COGNITO_CLIENTID) {
-          // console.debug(
-          //   `Invalid JWT token. Expected client id to be ${process.env.AUTH_COGNITO_CLIENTID} but found ${clientId}.`
-          // );
-          reject(
-            new AppError(
-              `Invalid JWT token. Expected client id to be ${process.env.AUTH_COGNITO_CLIENTID} but found ${clientId}.`, 401
-            )
-          ); // don't return detailed info to the caller
-          return;
-        }
+        // if (clientId !== process.env.AUTH_COGNITO_CLIENTID) {
+        //   // console.debug(
+        //   //   `Invalid JWT token. Expected client id to be ${process.env.AUTH_COGNITO_CLIENTID} but found ${clientId}.`
+        //   // );
+        //   reject(
+        //     new AppError(
+        //       `Invalid JWT token. Expected client id to be ${process.env.AUTH_COGNITO_CLIENTID} but found ${clientId}.`, 401
+        //     )
+        //   ); // don't return detailed info to the caller
+        //   return;
+        // }
 
         // Done - all JWT token claims can now be trusted
         return resolve(decodedAndVerified);

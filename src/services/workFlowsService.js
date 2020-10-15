@@ -184,6 +184,6 @@ exports.getFormsBysWorkOrder = (req, res) => {
     status: 201,
     message: 'lbl_resp_succes',
     serverTime: Date.now(),
-    data: test.form,
+    data: [test.form],
   });
 };
