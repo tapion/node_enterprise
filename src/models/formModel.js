@@ -377,6 +377,14 @@ exports.deleteAssociateTypeTask = async (params, userId) => {
   );
 };
 
+exports.deleteForm = async (params, userId) => {
+  return await db.query(
+    `UPDATE forms set deleted = true
+    WHERE id = $1`,
+    [params.formId]
+  );
+};
+
 exports.getFormsByTask = async (taskId) => {
   const associate = await db.query(
     `SELECT ftt."formId" as "idForm"

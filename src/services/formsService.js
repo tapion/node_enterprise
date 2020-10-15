@@ -128,6 +128,30 @@ exports.updateForm = async (req, res) => {
   }
 };
 
+exports.deleteForm = async (req, res) => {
+  try {
+    const schema = Joi.object({
+      formId: Joi.number().integer().min(1).required(),
+    });
+    const validate = schema.validate(req.params);
+    if (validate.error) {
+      throw validate.error;
+    }
+    await formModel.deleteForm(req.params, '@pendingToken');
+    res.status(200).json({
+      status: 200,
+      message: 'lbl_resp_succes',
+      serverTime: Date.now(),
+      data: {},
+    });
+  } catch (e) {
+    res.status(400).json({
+      status: 400,
+      message: e.message,
+    });
+  }
+};
+
 const buildElements = (resp) => {
   return resp.map((el) => {
     return {

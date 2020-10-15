@@ -19,6 +19,7 @@ router
 router
   .route('/:formId')
   .put(formService.validateForm, formService.updateForm)
+  .delete(formService.deleteForm)
   .get(formService.getForm);
 
 module.exports = router;
