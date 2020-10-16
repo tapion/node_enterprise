@@ -202,7 +202,7 @@ exports.CreateForm = async (body, sec, quest) => {
 exports.updateForm = async (body, sec, quest, parentFormId) => {
   quest = await createCatalogs(quest, body.userName);
   return await db.transactions(async (client) => {
-    await client.query('UPDATE forms set state = false where id = $1', [
+    await client.query('UPDATE forms set deleted = true where id = $1', [
       parentFormId,
     ]);
     const formId = await saveForm(client, quest, body, sec, parentFormId);
