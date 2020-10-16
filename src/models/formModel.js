@@ -129,10 +129,6 @@ const saveForm = async (client, quest, body, sec, parentFormId = null) => {
         throw new Error(
           `All elements must have a sections, no section on element id ${question.id}`
         );
-      if (!question.isNew)
-        throw new Error(
-          `All elements must be new, this is a old one id ${question.id}`
-        );
       const values = createJsonFromArray(question.source);
       const sectionId = newSections.find((el) => el.id == question.idSection);
       if (!sectionId) {
