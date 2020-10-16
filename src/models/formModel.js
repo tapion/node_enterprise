@@ -16,6 +16,8 @@ exports.types = [
   { id: 6, front: 'SECTION', mobile: '' },
   { id: 7, front: 'NUMBER', mobile: 'Number' },
   { id: 8, front: 'IMAGE', mobile: 'Photo' },
+  { id: 9, front: 'DATE', mobile: 'Date_mob' },
+  { id: 10, front: 'TIME', mobile: 'Time_mob' },
 ];
 
 const createJsonFromArray = (arr) => {
