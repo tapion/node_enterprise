@@ -2,10 +2,10 @@ openapi: 3.0.0
 info:
   description: |
     Manage all process about BokyLog
-  version: "1.0.0"
+  version: '1.0.0'
   title: BokyLog
 servers:
-# Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/innoBoky/bokyLog/1.0.0
   - description: SwaggerHub API Auto Mocking
@@ -80,8 +80,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /auth/login:
     post:
-      tags: 
-       - Auth
+      tags:
+        - Auth
       summary: Approve user and return basic user's data
       description: Give acces to app and return basic user's information
       operationId: login
@@ -90,7 +90,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:                
+              properties:
                 user:
                   type: string
                   maxLength: 50
@@ -115,8 +115,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /forms:
     post:
-      tags: 
-       - Forms
+      tags:
+        - Forms
       summary: Create new forms
       description: Create all forms that the system use
       operationId: formsCreate
@@ -142,10 +142,10 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
     get:
-      tags: 
-       - Forms
+      tags:
+        - Forms
       summary: All forms
-      description: Get all forms 
+      description: Get all forms
       operationId: FormGetAll
       responses:
         '200':
@@ -159,7 +159,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: 
+                    items:
                       type: object
                       properties:
                         id:
@@ -174,10 +174,10 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /forms/{formId}:
     get:
-      tags: 
-       - Forms
+      tags:
+        - Forms
       summary: Form by id
-      description: Get an specific form 
+      description: Get an specific form
       operationId: FormById
       parameters:
         - name: formId
@@ -201,10 +201,70 @@ paths:
                     $ref: '#/components/schemas/Forms'
         '404':
           $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - Forms
+      summary: Update forms
+      description: Update an especific form
+      operationId: formsUpdate
+      parameters:
+        - name: formId
+          in: path
+          description: Form id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Forms'
+        description: Create a form
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Forms'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags:
+        - Forms
+      summary: Delete one form
+      description: Delete one form
+      operationId: formDelete
+      parameters:
+        - name: formId
+          in: path
+          description: Form id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+        '404':
+          $ref: '#/components/responses/Unauthorized'
   /forms/task-types/:
     post:
-      tags: 
-       - Forms and Task Type
+      tags:
+        - Forms and Task Type
       summary: Asociate forms to type of task
       description: Asociate forms to type of task
       operationId: formsTypeTask
@@ -243,29 +303,29 @@ paths:
                 type: object
                 properties:
                   data:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        idTask:
-                          type: integer
-                        forms:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              idForm:
-                                type: integer
-                              isRequired:
-                                type: boolean
-                        idUser:
-                          type: string
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      idTask:
+                        type: integer
+                      forms:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            idForm:
+                              type: integer
+                            isRequired:
+                              type: boolean
+                      idUser:
+                        type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
   /forms/task-types/{idTask}:
     put:
-      tags: 
-       - Forms and Task Type
+      tags:
+        - Forms and Task Type
       summary: Asociate forms to type of task
       description: Asociate forms to type of task
       operationId: formsEditTypeTask
@@ -307,26 +367,26 @@ paths:
                 type: object
                 properties:
                   data:
-                      type: object
-                      properties:
-                        idTask:
-                          type: integer
-                        forms:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              idForm:
-                                type: integer
-                              isRequired:
-                                type: boolean
-                        idUser:
-                          type: string
+                    type: object
+                    properties:
+                      idTask:
+                        type: integer
+                      forms:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            idForm:
+                              type: integer
+                            isRequired:
+                              type: boolean
+                      idUser:
+                        type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
     get:
-      tags: 
-       - Forms and Task Type
+      tags:
+        - Forms and Task Type
       summary: Get all associate forms to type of task
       operationId: formsGetAllTypeTasks
       parameters:
@@ -348,27 +408,27 @@ paths:
                 type: object
                 properties:
                   data:
-                      type: object
-                      properties:
-                        idTask:
-                          type: integer
-                        forms:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              idForm:
-                                type: integer
-                              isRequired:
-                                type: boolean
-                              nameForm:
-                                type: string
+                    type: object
+                    properties:
+                      idTask:
+                        type: integer
+                      forms:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            idForm:
+                              type: integer
+                            isRequired:
+                              type: boolean
+                            nameForm:
+                              type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /forms/task-types/{idTask}/{idForm}:  
+  /forms/task-types/{idTask}/{idForm}:
     delete:
-      tags: 
-       - Forms and Task Type
+      tags:
+        - Forms and Task Type
       summary: Delete form from a Type Task
       operationId: formsDeleteTypeTask
       parameters:
@@ -398,8 +458,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /orders/type-task/:
     post:
-      tags: 
-       - Orders and Task Type
+      tags:
+        - Orders and Task Type
       summary: Asociate order to type of task
       description: Asociate order to type of task
       operationId: ordersTypeTask
@@ -438,27 +498,27 @@ paths:
                 type: object
                 properties:
                   data:
-                      type: object
-                      properties:
-                        idTypeOrder:
-                          type: integer
-                        tasks:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              idTask:
-                                type: integer
-                              status:
-                                type: boolean
-                        idUser:
-                          type: string
+                    type: object
+                    properties:
+                      idTypeOrder:
+                        type: integer
+                      tasks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            idTask:
+                              type: integer
+                            status:
+                              type: boolean
+                      idUser:
+                        type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
   /orders/type-task/{idTypeOrder}:
     put:
-      tags: 
-       - Orders and Task Type
+      tags:
+        - Orders and Task Type
       summary: Update order to type of task
       description: Update order to type of task
       operationId: ordersEditTypeTask
@@ -500,24 +560,24 @@ paths:
                 type: object
                 properties:
                   data:
-                      type: object
-                      properties:
-                        tasks:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              idTask:
-                                type: integer
-                              status:
-                                type: boolean
-                        idUser:
-                          type: string
+                    type: object
+                    properties:
+                      tasks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            idTask:
+                              type: integer
+                            status:
+                              type: boolean
+                      idUser:
+                        type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
     get:
-      tags: 
-       - Orders and Task Type
+      tags:
+        - Orders and Task Type
       summary: Get all associate forms to type of task
       operationId: ordersGetAllTypeTasks
       parameters:
@@ -539,26 +599,26 @@ paths:
                 type: object
                 properties:
                   data:
-                      type: object
-                      properties:
-                        idTypeOrder:
-                          type: integer
-                        tasks:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              idTask:
-                                type: integer
-                              status:
-                                type: boolean
-                              nameTask:
-                                type: string
+                    type: object
+                    properties:
+                      idTypeOrder:
+                        type: integer
+                      tasks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            idTask:
+                              type: integer
+                            status:
+                              type: boolean
+                            nameTask:
+                              type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
     delete:
-      tags: 
-       - Orders and Task Type
+      tags:
+        - Orders and Task Type
       summary: Delete orders by tasks Type
       operationId: ordersDeleteTypeTask
       parameters:
@@ -581,8 +641,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /roles/{roleId}/permissions:
     get:
-      tags: 
-       - Roles
+      tags:
+        - Roles
       summary: Get permissions by role
       description: Get an array of permissions by an specific role
       operationId: OptionsByRole
@@ -612,8 +672,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /users/{userId}/notifications:
     get:
-      tags: 
-       - Users
+      tags:
+        - Users
       summary: Notifications by user
       description: Get an array of all notifications that a user has
       operationId: NotificationsByUser
@@ -643,8 +703,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /notifications/{notificationId}:
     get:
-      tags: 
-       - Notifications
+      tags:
+        - Notifications
       summary: Notification specific
       description: Get information about a notification
       operationId: NotificationsByUserAndId
@@ -667,13 +727,13 @@ paths:
                 type: object
                 properties:
                   data:
-                      $ref: '#/components/schemas/Notifications'
+                    $ref: '#/components/schemas/Notifications'
         '401':
           $ref: '#/components/responses/Unauthorized'
   /notifications/:
     put:
-      tags: 
-       - Notifications
+      tags:
+        - Notifications
       summary: Add new notification for a user
       description: Add new notification for a user
       operationId: notificationAdd
@@ -694,13 +754,13 @@ paths:
                 type: object
                 properties:
                   data:
-                      $ref: '#/components/schemas/Notifications'
+                    $ref: '#/components/schemas/Notifications'
         '401':
           $ref: '#/components/responses/Unauthorized'
   /dashBoard/{initDate}/{finalDate}:
     get:
-      tags: 
-       - DashBoard
+      tags:
+        - DashBoard
       summary: Information about orders
       description: Get information about orders in an specific range of dates
       operationId: GeneralDashboard
@@ -734,11 +794,38 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
   /clients/:
+    post:
+      tags:
+        - Clients
+      summary: Create new clients
+      description: Create new clients
+      operationId: clientsCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Clients'
+        description: Create a form
+        required: true
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Clients'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     get:
-      tags: 
-       - Clients
+      tags:
+        - Clients
       summary: List of clients
-      operationId: clientsList      
+      operationId: clientsList
       responses:
         '200':
           description: successful operation
@@ -757,8 +844,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /operators/:
     get:
-      tags: 
-       - Operators
+      tags:
+        - Operators
       summary: List of all employess that being a operator
       operationId: operatorsList
       responses:
@@ -779,10 +866,10 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /zones/:
     get:
-      tags: 
-       - Zones
+      tags:
+        - Zones
       summary: List of divisions
-      operationId: divisionsList      
+      operationId: divisionsList
       responses:
         '200':
           description: successful operation
@@ -801,10 +888,10 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /states/:
     get:
-      tags: 
-       - States
+      tags:
+        - States
       summary: List of states
-      operationId: statesList      
+      operationId: statesList
       responses:
         '200':
           description: successful operation
@@ -823,8 +910,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /operators/locations/:
     get:
-      tags: 
-       - Operators
+      tags:
+        - Operators
       summary: List of operator's locations
       operationId: locationsList
       parameters:
@@ -852,8 +939,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
   /workflow/:
     get:
-      tags: 
-       - Work Flows
+      tags:
+        - Work Flows
       summary: N/A
       description: N/A
       operationId: workFlowList
@@ -972,7 +1059,7 @@ components:
     #       type: string
     Operators:
       type: object
-      description: Company operators 
+      description: Company operators
       required:
         - id
         - name
@@ -986,12 +1073,69 @@ components:
       description: Company clients
       required:
         - id
-        - name
+        - nit
+        - businessName
+        - adress
+        - phone
+        - email
+        - offices
+      properties:
+        id:
+          type: integer
+        nit:
+          type: string
+        businessName:
+          type: string
+        adress:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        status:
+          type: boolean
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientsContacts'
+        offices:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              nit:
+                type: string
+              businessName:
+                type: string
+              address:
+                type: string
+              phone:
+                type: string
+              name:
+                type: string
+              isPrincipal:
+                type: boolean
+              status:
+                type: boolean
+              contacts:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientsContacts'
+    ClientsContacts:
+      type: object
       properties:
         id:
           type: integer
         name:
           type: string
+        email:
+          type: string
+        phone:
+          type: string
+        state:
+          type: boolean
     GeneralOrdersInformation:
       type: object
       description: Resume orders by state [Report]
@@ -1066,7 +1210,7 @@ components:
         - message
     UserBasicInfo:
       type: object
-      description: Basic user information 
+      description: Basic user information
       properties:
         id:
           type: integer
@@ -1095,9 +1239,9 @@ components:
           type: integer
         name:
           type: string
-    TrackInformation:
+    TrackInformation: #Todo esta QUEMADO
       type: object
-      description: Params for track the user location, #BURNDATA
+      description: Params for track the user location
       properties:
         id:
           type: integer
@@ -1144,10 +1288,10 @@ components:
         id:
           type: integer
           format: int64
-        idSubOT:
+        idSubOT: #QUEMADO
           type: integer
           description: Sub task id, id de la tarea asignada al usuario
-        # idCreateMovil:          
+        # idCreateMovil:
         #   type: integer
         #   description: N/A
         # isMovilCreate:
@@ -1155,15 +1299,15 @@ components:
         #   description: N/A
         status:
           $ref: '#/components/schemas/Status'
-        dateStart:
+        dateStart: #QUEMADO
           type: string
           format: date-full
           description: Fecha de ??
-        dateEnd:
+        dateEnd: #QUEMADO
           type: string
           format: date-full
           description: Fecha de ??
-        datail:
+        datail: #QUEMADO
           type: string
           description: Detalle de la tarea
           # eliminar
@@ -1176,20 +1320,20 @@ components:
         typeOT:
           type: string
           description: Descripcion del tipo de tarea
-        isPriority:
+        isPriority: #QUEMADO
           type: boolean
         # colour:
         #   type: string
         #   description: Color de ??
-        area:
+        area: #QUEMADO
           $ref: '#/components/schemas/Areas'
         place:
           $ref: '#/components/schemas/Places'
-        priority:
+        priority: #QUEMADO
           $ref: '#/components/schemas/Priorities'
         # sla:
         #   $ref: '#/components/schemas/Slas'
-        assets:
+        assets: #QUEMADO
           type: array
           items:
             $ref: '#/components/schemas/Assets'
@@ -1226,7 +1370,7 @@ components:
           type: string
         detail:
           type: string
-        img: 
+        img:
           type: string
           format: uri
         readQR:
@@ -1265,28 +1409,28 @@ components:
       type: object
       description: Client ubication
       properties:
-        id:
+        id: #QUEMADO
           type: integer
         place:
           type: string
           description: Direccion
-        email:
+        email: #QUEMADO
           type: string
           format: email
           description: Email del jefe?
-        emailcc:
+        emailcc: #QUEMADO
           type: string
           format: email
           description: Email del jefe?
-        adress:
+        adress: #QUEMADO
           type: string
-        latitude:
+        latitude: #QUEMADO
           type: string
-        longitude:
+        longitude: #QUEMADO
           type: string
-        department:
+        department: #QUEMADO
           type: string
-        city:
+        city: #QUEMADO
           type: string
         client:
           $ref: '#/components/schemas/Clients'
@@ -1302,7 +1446,7 @@ components:
         name:
           type: string
     Status:
-      type: object      
+      type: object
       description: States for work orders
       properties:
         id:
@@ -1310,7 +1454,7 @@ components:
         name:
           type: string
     Catalog:
-      type: object      
+      type: object
       description: Generic data for all aplication
       properties:
         id:
@@ -1351,7 +1495,7 @@ components:
             $ref: '#/components/schemas/FormsQuestions'
     FormsQuestions:
       type: object
-      description: Form questions 
+      description: Form questions
       properties:
         id:
           type: integer
@@ -1388,10 +1532,10 @@ components:
           type: array
           items:
             type: object
-            properties: 
+            properties:
               id:
                 type: string
-              name:
+              abbreviation:
                 type: string
               value:
                 type: integer
@@ -1419,9 +1563,9 @@ components:
         - serverTime
         - data
   securitySchemes:
-      api_key:
-        type: apiKey
-        name: api_key
-        in: header
-security: 
-  - api_key: [ ]
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+security:
+  - api_key: []
