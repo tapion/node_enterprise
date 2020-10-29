@@ -77,3 +77,10 @@ exports.allCostumers = async () => {
   WHERE c."customerId" IS NULL
   ORDER BY c."name"`);
 };
+exports.deleteCustomer = async (costumerId) => {
+  return await db.query(
+    `UPDATE customers set deleted = true 
+    where id = $1`,
+    [costumerId]
+  );
+};
