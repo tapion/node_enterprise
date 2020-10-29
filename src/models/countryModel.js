@@ -17,3 +17,14 @@ exports.citiesByCountry = async (country) => {
     [country]
   );
 };
+exports.countries = async () => {
+  return await db.query(
+    `SELECT 
+    c.iso AS "isoCod",
+    c."name" 
+    FROM countries c 
+    WHERE c.deleted = FALSE 
+    AND c.state = TRUE 
+    ORDER BY upper(c."name" )`
+  );
+};
