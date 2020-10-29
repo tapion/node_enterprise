@@ -57,38 +57,12 @@ exports.createClients = wrapAsyncFn(async (req, res) => {
   });
 });
 
-exports.getClients = (req, res) => {
-  try {
-    res.status(200).json({
-      status: 'success',
-      serverTime: Date.now(),
-      data: [
-        {
-          id: 1,
-          name: 'Cumis',
-        },
-        {
-          id: 2,
-          name: 'Pepsi',
-        },
-        {
-          id: 3,
-          name: 'Vanti',
-        },
-        {
-          id: 5,
-          name: 'Enel',
-        },
-        {
-          id: 4,
-          name: 'ETB',
-        },
-      ],
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: 'error',
-      body: err.message,
-    });
-  }
-};
+exports.getClients = wrapAsyncFn(async (req, res) => {
+  const costumers = await clientModel.allCostumers();
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: costumers.rows,
+  });
+});
