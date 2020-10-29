@@ -10,7 +10,7 @@ exports.citiesByCountry = async (country) => {
     , c.city 
     , c."zone" 
     FROM cities c 
-    INNER JOIN countries c2 ON c2.id = c."countryId" 
+    INNER JOIN countries c2 ON c2.iso = c."countryIso"
       AND c2.iso = $1 AND c2.deleted = FALSE AND c2.state = TRUE 
     WHERE c.deleted = FALSE AND c.state = TRUE 
     ORDER BY upper(city),upper(c."zone")  `,
