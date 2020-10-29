@@ -1,29 +1,59 @@
 const Joi = require('@hapi/joi');
 const wrapAsyncFn = require('../utils/wrapAsyncFunction');
+const clientModel = require('../models/clientModel');
 
-exports.createClients = wrapAsyncFn((req, res) => {
+exports.createClients = wrapAsyncFn(async (req, res) => {
   const schema = Joi.object({
-    id: Joi.number().integer().allow(null).empty(''),
     nit: Joi.string().min(5).required(),
-    businessName: Joi.string().min(5).required(),
-    adress: Joi.string().min(5).required(),
+    businessName: Joi.string().min(3).required(),
+    address: Joi.string().min(5).required(),
+    country: Joi.string().max(2).required(),
+    city: Joi.number().integer().min(1).required(),
     phone: Joi.string().min(6).required(),
     email: Joi.string()
       .email({ tlds: { allow: false } })
       .required(),
-    status: Joi.boolean().required(),
     contacts: Joi.array().items(
       Joi.object({
-        id: Joi.number().integer().allow(null).empty(''),
         name: Joi.string().required(),
         email: Joi.string()
           .email({ tlds: { allow: false } })
           .required(),
         phone: Joi.string().required(),
-        state: Joi.boolean().required(),
       })
     ),
-    offices: Joi.array().items(Joi.object({})),
+    offices: Joi.array().items(
+      Joi.object({
+        nit: Joi.string().min(5).required(),
+        businessName: Joi.string().min(3).required(),
+        address: Joi.string().min(5).required(),
+        country: Joi.string().max(2).required(),
+        city: Joi.number().integer().min(1).required(),
+        phone: Joi.string().min(6).required(),
+        contacts: Joi.array().items(
+          Joi.object({
+            name: Joi.string().required(),
+            email: Joi.string()
+              .email({ tlds: { allow: false } })
+              .required(),
+            phone: Joi.string().required(),
+          })
+        ),
+      })
+    ),
+  });
+  const validate = schema.validate(req.body);
+  if (validate.error) {
+    throw validate.error;
+  }
+  const newClient = await clientModel.createClient(req.body, {
+    name: 'miguel.vargas',
+  });
+  res.status(201).json({
+    status: 201,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: newClient,
   });
 });
 

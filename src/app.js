@@ -31,7 +31,7 @@ app.use('/v1/roles/', rolsRoute);
 app.use('/v1/countries/', countriesRoute);
 app.use('/v1/notifications/', notificationsRoute);
 app.use('/v1/users/', usersRoute);
-app.use('/v1/clients/', clientsRoute);
+app.use('/v1/costumers/', clientsRoute);
 app.use('/v1/zones/', zoneRoute);
 app.use('/v1/states/', stateRoute);
 app.use('/v1/dashBoard/', dashBoardRoute);
