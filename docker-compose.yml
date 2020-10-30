@@ -5,7 +5,7 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-    command: sh -c "npm install --production && npm run start"
+    command: sh -c "npm install --production && npm run start:qa"
     ports:
       - 3000:3000
 #   postgres:
