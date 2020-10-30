@@ -7,5 +7,8 @@ router
   .route('/')
   .post(clientService.createClients)
   .get(clientService.getClients);
-router.route('/:idCustomer').delete(clientService.deleteCustomer);
+router
+  .route('/:idCustomer')
+  .get(clientService.getCustomerById)
+  .delete(clientService.deleteCustomer);
 module.exports = router;

@@ -1,5 +1,5 @@
-//const dotenv = require('dotenv');
 const db = require('../db');
+const AppError = require('../utils/appError');
 
 const createContactsByOffice = async (instance, office, contacts, user) => {
   if (!contacts) return null;
@@ -77,6 +77,69 @@ exports.allCostumers = async () => {
   INNER JOIN countries c3 ON c3.deleted = FALSE AND c3.state = TRUE AND c3.iso = c2."countryIso" 
   WHERE c."customerId" IS NULL and c.deleted = FALSE
   ORDER BY c."name"`);
+};
+
+const getContactsByOffice = async (office) => {
+  return await db.query(
+    `SELECT 
+    cc.id 
+    ,cc."name" 
+    ,cc.email 
+    ,cc.phone 
+    ,cc.state 
+    FROM "customersContacts" cc 
+    WHERE cc."customerId" = $1 AND cc.deleted = FALSE `,
+    [office]
+  );
+};
+const getOfficesByParent = async (parent) => {
+  return await await db.query(
+    `SELECT 
+    c.id 
+    ,c."document" AS nit 
+    ,c."name" AS "businessName"
+    ,c.adress 
+    ,c.phone 
+    ,c.email 
+    ,c."countryIso" AS country
+    ,c."cityId"  AS city
+    ,c.status AS state
+    FROM customers c
+    WHERE c.deleted = FALSE AND c."customerId" = $1 `,
+    [parent]
+  );
+};
+
+exports.getCustomerById = async (customerId) => {
+  const mainOffice = await db.query(
+    `SELECT 
+  c.id 
+  ,c."document" AS nit 
+  ,c."name" AS "businessName"
+  ,c.adress 
+  ,c.phone 
+  ,c.email 
+  ,c."countryIso" AS country
+  ,c."cityId"  AS city
+  ,c.status AS state
+  FROM customers c
+  WHERE c.deleted = FALSE AND c."customerId" IS NULL AND c.id = $1`,
+    [customerId]
+  );
+  if (mainOffice.rows <= 0) throw new AppError('Customer does not exist', 404);
+  const mainContacts = await getContactsByOffice(customerId);
+  const otherOffices = await getOfficesByParent(customerId);
+  const offices = await Promise.all(
+    otherOffices.rows.map(async (off) => {
+      const tmp = await getContactsByOffice(off.id);
+      off.contacts = tmp.rows;
+      return off;
+    })
+  );
+  const customer = mainOffice.rows[0];
+  customer.contacts = mainContacts.rows[0];
+  customer.offices = offices;
+  return customer;
 };
 exports.deleteCustomer = async (costumerId) => {
   return await db.query(

@@ -100,3 +100,20 @@ exports.deleteCustomer = wrapAsyncFn(async (req, res) => {
     data: {},
   });
 });
+
+exports.getCustomerById = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    idCustomer: Joi.number().integer().min(1).required(),
+  });
+  const validate = schema.validate(req.params);
+  if (validate.error) {
+    throw validate.error;
+  }
+  const customer = await clientModel.getCustomerById(req.params.idCustomer);
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: customer,
+  });
+});
