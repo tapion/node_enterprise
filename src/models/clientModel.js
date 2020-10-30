@@ -5,13 +5,32 @@ const createContactsByOffice = async (instance, office, contacts, user) => {
   if (!contacts) return null;
   return await Promise.all(
     contacts.map(async (contact) => {
-      const tmp = await instance.query(
-        `INSERT INTO "customersContacts" ("name", email, phone, "customerId", "creationUser")
+      if (!contact.id) {
+        console.log('crea contacto ', contact.name);
+        const tmp = await instance.query(
+          `INSERT INTO "customersContacts" ("name", email, phone, "customerId", "creationUser")
       VALUES($1,$2,$3,$4,$5) RETURNING id;
       `,
-        [contact.name, contact.email, contact.phone, office.id, user.name]
-      );
-      contact.id = tmp.rows[0].id;
+          [contact.name, contact.email, contact.phone, office.id, user.name]
+        );
+        contact.id = tmp.rows[0].id;
+      } else {
+        await instance.query(
+          `UPDATE "customersContacts"
+        SET "name"=$1, email=$2, phone=$3, "customerId"=$4, "modificationUser"=$5
+        , "modificationDate"=now(), state=$6
+        WHERE id=$7`,
+          [
+            contact.name,
+            contact.email,
+            contact.phone,
+            office.id,
+            user.name,
+            contact.state,
+            contact.id,
+          ]
+        );
+      }
       return contact;
     })
   );
@@ -20,7 +39,7 @@ const createContactsByOffice = async (instance, office, contacts, user) => {
 const createOffices = async (instance, office, parentOffice, user) => {
   const resOffice = await instance.query(
     `INSERT INTO customers
-      ("document", "name", adress, 
+      ("document", "name", address, 
       email, phone, "creationUser", "countryIso", "cityId", "customerId")
     VALUES($1, $2, $3, $4, $5,$6,$7,$8,$9) RETURNING id;
     `,
@@ -37,6 +56,37 @@ const createOffices = async (instance, office, parentOffice, user) => {
     ]
   );
   office.id = resOffice.rows[0].id;
+  office.contacts = await createContactsByOffice(
+    instance,
+    office,
+    office.contacts,
+    user
+  );
+  return office;
+};
+
+const updateOffices = async (instance, office, user) => {
+  await instance.query(
+    `UPDATE customers
+      SET "document"=$1, "name"=$2, address=$3, email=$4, phone=$5
+        , status=$6, "modificationUser"=$7, "modificationDate"=now()
+        , "countryIso"=$8, "cityId"=$9
+  WHERE id=$10;
+  `,
+    [
+      office.nit,
+      office.businessName,
+      office.address,
+      office.email,
+      office.phone,
+      office.state,
+      user.name,
+      office.country,
+      office.city,
+      office.id,
+    ]
+  );
+
   office.contacts = await createContactsByOffice(
     instance,
     office,
@@ -65,7 +115,7 @@ exports.allCostumers = async () => {
   c.id ,
   c."document" as nit,
   c."name"  as "businessName",
-  c.adress as address ,
+  c.address as address ,
   c.email ,
   c.phone ,
   c3."name" as country,
@@ -98,7 +148,7 @@ const getOfficesByParent = async (parent) => {
     c.id 
     ,c."document" AS nit 
     ,c."name" AS "businessName"
-    ,c.adress 
+    ,c.address 
     ,c.phone 
     ,c.email 
     ,c."countryIso" AS country
@@ -116,7 +166,7 @@ exports.getCustomerById = async (customerId) => {
   c.id 
   ,c."document" AS nit 
   ,c."name" AS "businessName"
-  ,c.adress 
+  ,c.address 
   ,c.phone 
   ,c.email 
   ,c."countryIso" AS country
@@ -137,14 +187,30 @@ exports.getCustomerById = async (customerId) => {
     })
   );
   const customer = mainOffice.rows[0];
-  customer.contacts = mainContacts.rows[0];
+  customer.contacts = mainContacts.rows;
   customer.offices = offices;
   return customer;
 };
-exports.deleteCustomer = async (costumerId) => {
+exports.deleteCustomer = async (costumerId, user) => {
   return await db.query(
-    `UPDATE customers set deleted = true 
+    `UPDATE customers set deleted = true , "modificationDate"=now(), "modificationUser"=$2
     where id = $1`,
-    [costumerId]
+    [costumerId, user.name]
   );
+};
+exports.updateClient = async (body, user) => {
+  return await db.transactions(async (client) => {
+    const mainOffice = await updateOffices(client, body, user);
+    const offices = await Promise.all(
+      body.offices.map(async (office) => {
+        if (office.id) {
+          return await updateOffices(client, office, user);
+        }
+        return await createOffices(client, office, mainOffice, user);
+      })
+    );
+    const respOffice = { ...mainOffice };
+    respOffice.offices = offices;
+    return respOffice;
+  });
 };

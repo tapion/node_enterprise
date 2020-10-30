@@ -5,10 +5,15 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(clientService.createClients)
+  .post(clientService.createAndupdateValidations, clientService.createClients)
   .get(clientService.getClients);
 router
   .route('/:idCustomer')
-  .get(clientService.getCustomerById)
-  .delete(clientService.deleteCustomer);
+  .get(clientService.validaCostumerIdParam, clientService.getCustomerById)
+  .put(
+    clientService.validaCostumerIdParam,
+    clientService.createAndupdateValidations,
+    clientService.updateCustomer
+  )
+  .delete(clientService.validaCostumerIdParam, clientService.deleteCustomer);
 module.exports = router;
