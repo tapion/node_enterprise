@@ -70,12 +70,12 @@ exports.allCostumers = async () => {
   c.phone ,
   c3."name" as country,
   c2.city
-  ,c.status 
+  ,c.status as state
   ,(SELECT count(*) FROM customers c4 WHERE c4."customerId" = c.id) AS offices
   FROM customers c 
   INNER JOIN cities c2 ON c2.id = c."cityId" AND c2.deleted = FALSE AND c2.state = TRUE 
   INNER JOIN countries c3 ON c3.deleted = FALSE AND c3.state = TRUE AND c3.iso = c2."countryIso" 
-  WHERE c."customerId" IS NULL
+  WHERE c."customerId" IS NULL and c.deleted = FALSE
   ORDER BY c."name"`);
 };
 exports.deleteCustomer = async (costumerId) => {
