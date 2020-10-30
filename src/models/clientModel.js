@@ -2,6 +2,7 @@
 const db = require('../db');
 
 const createContactsByOffice = async (instance, office, contacts, user) => {
+  if (!contacts) return null;
   return await Promise.all(
     contacts.map(async (contact) => {
       const tmp = await instance.query(
