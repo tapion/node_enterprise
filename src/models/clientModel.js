@@ -6,7 +6,6 @@ const createContactsByOffice = async (instance, office, contacts, user) => {
   return await Promise.all(
     contacts.map(async (contact) => {
       if (!contact.id) {
-        console.log('crea contacto ', contact.name);
         const tmp = await instance.query(
           `INSERT INTO "customersContacts" ("name", email, phone, "customerId", "creationUser")
       VALUES($1,$2,$3,$4,$5) RETURNING id;
@@ -32,6 +31,25 @@ const createContactsByOffice = async (instance, office, contacts, user) => {
         );
       }
       return contact;
+    })
+  );
+};
+
+const deleteContacts = async (instance, contacts, user, customerId) => {
+  const actualContacts = await instance.query(
+    `SELECT id FROM "customersContacts" where "customerId" = $1`,
+    [customerId]
+  );
+  const forDeletingContact = actualContacts.rows.filter(
+    (org) => !contacts.find((cont) => cont.id === org.id)
+  );
+  await Promise.all(
+    forDeletingContact.map(async (cont) => {
+      return await instance.query(
+        `UPDATE "customersContacts" set deleted = true, "modificationUser"=$2
+        , "modificationDate"=now() WHERE id = $1 `,
+        [cont.id, user.name]
+      );
     })
   );
 };
@@ -86,6 +104,8 @@ const updateOffices = async (instance, office, user) => {
       office.id,
     ]
   );
+
+  await deleteContacts(instance, office.contacts, user, office.id);
 
   office.contacts = await createContactsByOffice(
     instance,
