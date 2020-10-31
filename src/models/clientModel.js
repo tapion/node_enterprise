@@ -37,7 +37,7 @@ const createContactsByOffice = async (instance, office, contacts, user) => {
 
 const deleteContacts = async (instance, contacts, user, customerId) => {
   const actualContacts = await instance.query(
-    `SELECT id FROM "customersContacts" where "customerId" = $1`,
+    `SELECT id FROM "customersContacts" where "customerId" = $1 and deleted = false`,
     [customerId]
   );
   const forDeletingContact = actualContacts.rows.filter(
@@ -47,6 +47,27 @@ const deleteContacts = async (instance, contacts, user, customerId) => {
     forDeletingContact.map(async (cont) => {
       return await instance.query(
         `UPDATE "customersContacts" set deleted = true, "modificationUser"=$2
+        , "modificationDate"=now() WHERE id = $1 `,
+        [cont.id, user.name]
+      );
+    })
+  );
+};
+
+const deleteOffices = async (instance, offices, user, customerId) => {
+  const actualOffices = await instance.query(
+    `SELECT c.id 
+    FROM customers c
+    WHERE c."customerId" = $1 AND c.deleted = FALSE`,
+    [customerId]
+  );
+  const forDeletingContact = actualOffices.rows.filter(
+    (org) => !offices.find((cont) => cont.id === org.id)
+  );
+  return await Promise.all(
+    forDeletingContact.map(async (cont) => {
+      return await instance.query(
+        `UPDATE "customers" set deleted = true, "modificationUser"=$2
         , "modificationDate"=now() WHERE id = $1 `,
         [cont.id, user.name]
       );
@@ -221,6 +242,7 @@ exports.deleteCustomer = async (costumerId, user) => {
 exports.updateClient = async (body, user) => {
   return await db.transactions(async (client) => {
     const mainOffice = await updateOffices(client, body, user);
+    await deleteOffices(client, body.offices, user, mainOffice.id);
     const offices = await Promise.all(
       body.offices.map(async (office) => {
         if (office.id) {
