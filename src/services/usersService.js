@@ -1,43 +1,69 @@
 const Joi = require('@hapi/joi');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const userModel = require('../models/usersModel');
+const wrapAsyncFn = require('../utils/wrapAsyncFunction');
 
-exports.getNotificationsByUser = (req, res) => {
-  try {
-    const schema = Joi.object({
-      userId: Joi.number().integer().min(1).required(),
-    });
-    const validate = schema.validate(req.params);
-    if (validate.error) throw validate.error;
-    res.status(200).json({
-      status: 'success',
-      serverTime: Date.now(),
-      data: [
-        {
-          id: 5,
-          unRead: true,
-          typeId: 1,
-          shortMessage: 'Es el camioin placa DBF79E',
-          sentDate: new Date().setDate(new Date().getMinutes() - 15),
-        },
-        {
-          id: 6,
-          unRead: true,
-          typeId: 1,
-          shortMessage: 'Firmar orden por Ricardo Galvis',
-          sentDate: new Date().setDate(new Date().getMinutes() - 25),
-        },
-        {
-          id: 15,
-          unRead: false,
-          typeId: 1,
-          shortMessage: 'El equipo a revisar esta en el segundo piso',
-          sentDate: new Date().setDate(new Date().getMinutes() - 45),
-        },
-      ],
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: 'error',
-      body: err.message,
-    });
-  }
+const validatePassword = async (possiblePassword, password) => {
+  return await bcrypt.compare(possiblePassword, password);
 };
+
+const createToken = (user) => {
+  return jwt.sign(
+    {
+      email: user.email,
+      name: user.name,
+      userName: user.userName,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRE_IN,
+    }
+  );
+};
+
+exports.login = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    email: Joi.string()
+      .email({ tlds: { allow: false } })
+      .required(),
+    password: Joi.string().required(),
+  });
+  const validate = schema.validate(req.body);
+  if (validate.error) throw validate.error;
+  const user = await userModel.getUser(req.body.email);
+  if (
+    user.rows.length <= 0 ||
+    !validatePassword(req.body.password, user.rows[0].password)
+  )
+    throw new Error('User or email invalid', 403);
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: { token: createToken(user.rows[0]) },
+  });
+});
+
+exports.signUp = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    email: Joi.string()
+      .email({ tlds: { allow: false } })
+      .required(),
+    password: Joi.string().required(),
+    name: Joi.string().required(),
+    userName: Joi.string().required(),
+  });
+  const validate = schema.validate(req.body);
+  if (validate.error) throw validate.error;
+  await userModel.createUser(
+    req.body,
+    await bcrypt.hash(req.body.password, 12)
+  );
+  res.status(201).json({
+    status: 201,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: { ...req.body },
+  });
+});

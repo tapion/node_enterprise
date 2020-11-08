@@ -3,6 +3,7 @@ const userService = require('../services/usersService');
 
 const router = express.Router();
 
-router.route('/:userId/notifications').get(userService.getNotificationsByUser);
+router.route('/login').post(userService.login);
+router.route('/signUp_temp').post(userService.signUp);
 
 module.exports = router;
