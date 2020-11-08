@@ -10,7 +10,8 @@ exports.createUser = async (user, password) => {
 
 exports.getUser = async (email) => {
   return await db.query(
-    `SELECT email, "userName", name, password FROM users where email = $1`,
+    `SELECT email, "userName", name, password, "changedPasswordAt" FROM users where email = $1 
+      and state = true and deleted = false`,
     [email]
   );
 };

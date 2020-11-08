@@ -88,6 +88,7 @@ const formsByTaskId = async (typeOrder) => {
 
 exports.workOrders = async (req, res) => {
   try {
+    console.log('Desde workOrders', res.userLoged);
     const schema = Joi.object({
       operatorId: Joi.number().integer().min(1).required(),
     });
@@ -210,57 +211,3 @@ exports.getAllOperators = (req, res) => {
     ],
   });
 };
-
-// exports.getLocations = (req, res) => {
-//   try {
-//     const shema = Joi.object({
-//       idCompany: Joi.number().integer().required(),
-//     });
-//     const value = shema.validate(req.query);
-//     if (!value.error) {
-//       res.status(200).json({
-//         status: 'success',
-//         serverTime: Date.now(),
-//         data: [
-//           {
-//             id: 1,
-//             title: 'Parqueadero Antioquia',
-//             latitude: 4.613417,
-//             longitude: -74.075489,
-//           },
-//           {
-//             id: 2,
-//             title: 'Sede Mexico',
-//             latitude: 4.615266,
-//             longitude: -74.136272,
-//           },
-//           {
-//             id: 5,
-//             title: 'Parqueadero Antioquia',
-//             latitude: 4.613417,
-//             longitude: -74.075489,
-//           },
-//           {
-//             id: 12,
-//             title: 'Risaralda taller',
-//             latitude: 4.614951,
-//             longitude: -74.135976,
-//           },
-//           {
-//             id: 14,
-//             title: 'Tuberias Joy',
-//             latitude: 4.612317,
-//             longitude: -74.074748,
-//           },
-//         ],
-//       });
-//     } else {
-//       throw value.error;
-//     }
-//   } catch (err) {
-//     res.status(500).json({
-//       message: 'error',
-//       body: err.message,
-//     });
-//   }
-// };
