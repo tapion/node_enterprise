@@ -10,7 +10,7 @@ const createContactsByOffice = async (instance, office, contacts, user) => {
           `INSERT INTO "customersContacts" ("name", email, phone, "customerId", "creationUser")
       VALUES($1,$2,$3,$4,$5) RETURNING id;
       `,
-          [contact.name, contact.email, contact.phone, office.id, user.name]
+          [contact.name, contact.email, contact.phone, office.id, user.userName]
         );
         contact.id = tmp.rows[0].id;
       } else {
@@ -24,7 +24,7 @@ const createContactsByOffice = async (instance, office, contacts, user) => {
             contact.email,
             contact.phone,
             office.id,
-            user.name,
+            user.userName,
             contact.state,
             contact.id,
           ]
@@ -48,7 +48,7 @@ const deleteContacts = async (instance, contacts, user, customerId) => {
       return await instance.query(
         `UPDATE "customersContacts" set deleted = true, "modificationUser"=$2
         , "modificationDate"=now() WHERE id = $1 `,
-        [cont.id, user.name]
+        [cont.id, user.userName]
       );
     })
   );
@@ -69,7 +69,7 @@ const deleteOffices = async (instance, offices, user, customerId) => {
       return await instance.query(
         `UPDATE "customers" set deleted = true, "modificationUser"=$2
         , "modificationDate"=now() WHERE id = $1 `,
-        [cont.id, user.name]
+        [cont.id, user.userName]
       );
     })
   );
@@ -88,7 +88,7 @@ const createOffices = async (instance, office, parentOffice, user) => {
       office.address,
       office.email,
       office.phone,
-      user.name,
+      user.userName,
       office.country,
       office.city,
       parentOffice.id,
@@ -119,7 +119,7 @@ const updateOffices = async (instance, office, user) => {
       office.email,
       office.phone,
       office.state,
-      user.name,
+      user.userName,
       office.country,
       office.city,
       office.id,
@@ -236,7 +236,7 @@ exports.deleteCustomer = async (costumerId, user) => {
   return await db.query(
     `UPDATE customers set deleted = true , "modificationDate"=now(), "modificationUser"=$2
     where id = $1`,
-    [costumerId, user.name]
+    [costumerId, user.userName]
   );
 };
 exports.updateClient = async (body, user) => {

@@ -88,7 +88,6 @@ const formsByTaskId = async (typeOrder) => {
 
 exports.workOrders = async (req, res) => {
   try {
-    console.log('Desde workOrders', res.userLoged);
     const schema = Joi.object({
       operatorId: Joi.number().integer().min(1).required(),
     });

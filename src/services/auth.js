@@ -36,7 +36,7 @@ exports.getVerifyMiddleware = wrapAsyncFn(async (req, res, next) => {
   }
   if (
     user.rows[0].changedPasswordAt &&
-    tokenData.iat < user.rows[0].changedPasswordAt
+    tokenData.iat < user.rows[0].changedPasswordAt.getTime() / 1000
   ) {
     return next(new AppError('Token expired', 403));
   }

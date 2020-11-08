@@ -75,9 +75,7 @@ exports.createAndupdateValidations = (req, res, next) => {
 };
 
 exports.createClients = wrapAsyncFn(async (req, res) => {
-  const newClient = await clientModel.createClient(req.body, {
-    name: 'miguel.vargas',
-  });
+  const newClient = await clientModel.createClient(req.body, res.userLoged);
   res.status(201).json({
     status: 201,
     message: 'lbl_resp_succes',
@@ -97,10 +95,7 @@ exports.getClients = wrapAsyncFn(async (req, res) => {
 });
 
 exports.deleteCustomer = wrapAsyncFn(async (req, res) => {
-  /** TODO: Ajustar temas del usuario */
-  await clientModel.deleteCustomer(req.params.idCustomer, {
-    name: 'miguel.vargas',
-  });
+  await clientModel.deleteCustomer(req.params.idCustomer, res.userLoged);
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
@@ -120,9 +115,7 @@ exports.getCustomerById = wrapAsyncFn(async (req, res) => {
 });
 
 exports.updateCustomer = wrapAsyncFn(async (req, res) => {
-  const newClient = await clientModel.updateClient(req.body, {
-    name: 'miguel.vargas',
-  });
+  const newClient = await clientModel.updateClient(req.body, res.userLoged);
   res.status(201).json({
     status: 201,
     message: 'lbl_resp_succes',
