@@ -75,7 +75,7 @@ exports.createAndupdateValidations = (req, res, next) => {
 };
 
 exports.createClients = wrapAsyncFn(async (req, res) => {
-  const newClient = await clientModel.createClient(req.body, res.userLoged);
+  const newClient = await clientModel.createClient(req.body, req.userLoged);
   res.status(201).json({
     status: 201,
     message: 'lbl_resp_succes',
@@ -95,7 +95,7 @@ exports.getClients = wrapAsyncFn(async (req, res) => {
 });
 
 exports.deleteCustomer = wrapAsyncFn(async (req, res) => {
-  await clientModel.deleteCustomer(req.params.idCustomer, res.userLoged);
+  await clientModel.deleteCustomer(req.params.idCustomer, req.userLoged);
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
@@ -115,7 +115,7 @@ exports.getCustomerById = wrapAsyncFn(async (req, res) => {
 });
 
 exports.updateCustomer = wrapAsyncFn(async (req, res) => {
-  const newClient = await clientModel.updateClient(req.body, res.userLoged);
+  const newClient = await clientModel.updateClient(req.body, req.userLoged);
   res.status(201).json({
     status: 201,
     message: 'lbl_resp_succes',

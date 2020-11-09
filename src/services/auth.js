@@ -40,6 +40,6 @@ exports.getVerifyMiddleware = wrapAsyncFn(async (req, res, next) => {
   ) {
     return next(new AppError('Token expired', 403));
   }
-  res.userLoged = tokenData;
+  req.userLoged = tokenData;
   next();
 });

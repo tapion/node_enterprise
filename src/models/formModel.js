@@ -52,7 +52,7 @@ const consumeCatalogs = async (catalog, caller) => {
   return response.data;
 };
 
-const createCatalogs = async (quest, username) => {
+const createCatalogs = async (quest, user) => {
   try {
     const post = bent(`${process.env.CATALOG_HOST}`, 'POST', 'json', 200);
 
@@ -69,7 +69,7 @@ const createCatalogs = async (quest, username) => {
             {
               name: q.nameSource,
               status: true,
-              userName: username,
+              userName: user.userName,
               value: q.nameSource,
               father: 0,
             },
@@ -81,7 +81,7 @@ const createCatalogs = async (quest, username) => {
                 {
                   name: q1.name,
                   status: true,
-                  userName: username,
+                  userName: user.userName,
                   value: q1.abbreviation,
                   father: q.idTable,
                 },
@@ -106,11 +106,18 @@ const createCatalogs = async (quest, username) => {
   }
 };
 
-const saveForm = async (client, quest, body, sec, parentFormId = null) => {
+const saveForm = async (
+  client,
+  quest,
+  body,
+  sec,
+  user,
+  parentFormId = null
+) => {
   const form = {};
   let res = await client.query(
     'INSERT INTO forms ("name", description, state, user_creation,"formIdParent") VALUES ($1,$2,$3,$4,$5) RETURNING id;',
-    [body.name, body.description, body.state, body.userName, parentFormId]
+    [body.name, body.description, body.state, user.userName, parentFormId]
   );
   form.id = res.rows[0].id;
   //Sections
@@ -118,7 +125,7 @@ const saveForm = async (client, quest, body, sec, parentFormId = null) => {
     sec.map(async (section) => {
       res = await client.query(
         'INSERT INTO sections ("name", state, form_id, user_creation) VALUES ($1,$2, $3, $4) RETURNING id;',
-        [section.title, section.isRequired, form.id, body.userName]
+        [section.title, section.isRequired, form.id, user.userName]
       );
       section.idk = res.rows[0].id;
       return section;
@@ -165,7 +172,7 @@ const saveForm = async (client, quest, body, sec, parentFormId = null) => {
           question.nameSource,
           `[${values}]`,
           sectionId.idk,
-          body.userName,
+          user.userName,
           question.placeHolder,
           question.isReadOnly,
           question.value,
@@ -193,29 +200,30 @@ const saveForm = async (client, quest, body, sec, parentFormId = null) => {
   return form.id;
 };
 
-exports.CreateForm = async (body, sec, quest) => {
-  quest = await createCatalogs(quest, body.userName);
+exports.CreateForm = async (body, sec, quest, user) => {
+  quest = await createCatalogs(quest, user);
   return await db.transactions(async (client) => {
-    await saveForm(client, quest, body, sec);
+    await saveForm(client, quest, body, sec, user);
     return { body, sec, quest };
   });
 };
 
-exports.updateForm = async (body, sec, quest, parentFormId) => {
-  quest = await createCatalogs(quest, body.userName);
+exports.updateForm = async (body, sec, quest, parentFormId, user) => {
+  quest = await createCatalogs(quest, user);
   return await db.transactions(async (client) => {
-    await client.query('UPDATE forms set deleted = true where id = $1', [
-      parentFormId,
-    ]);
-    const formId = await saveForm(client, quest, body, sec, parentFormId);
+    await client.query(
+      'UPDATE forms set deleted = true,user_modification = $2, modification=now() where id = $1',
+      [parentFormId, user.userName]
+    );
+    const formId = await saveForm(client, quest, body, sec, user, parentFormId);
     await client.query(
       `INSERT INTO "formsTypeTasks" ("taskId", "formId" ,required, "creationUser" )
       SELECT "taskId", $1, required, $2 FROM "formsTypeTasks" WHERE "formId" = $3 `,
-      [formId, body.userName, parentFormId]
+      [formId, user.userName, parentFormId]
     );
     await client.query(
-      `UPDATE "formsTypeTasks" set state = false WHERE "formId" = $1 `,
-      [parentFormId]
+      `UPDATE "formsTypeTasks" set state = false, "modificationUser"=$2, "modificationDate"=now() WHERE "formId" = $1 `,
+      [parentFormId, user.userName]
     );
     return { body, sec, quest };
   });
@@ -346,28 +354,28 @@ exports.getQuestionsBySection = async (sectionId) => {
     })
   );
 };
-exports.associateTypeTask = async (req) => {
+exports.associateTypeTask = async (req, user) => {
   return await Promise.all(
     req.forms.map(async (form) => {
       await db.query(
         `INSERT INTO "formsTypeTasks" ("taskId", "formId", "creationUser", required) VALUES ($1,$2, $3, $4) RETURNING id;`,
-        [req.idTask, form.idForm, req.idUser, form.isRequired]
+        [req.idTask, form.idForm, user.userName, form.isRequired]
       );
     })
   );
 };
-exports.updateAssociateTypeTask = async (taskId, req) => {
+exports.updateAssociateTypeTask = async (taskId, req, user) => {
   return await db.query(
     `UPDATE "formsTypeTasks" 
       set "modificationDate" = now()
       , "modificationUser" = $3
       , required = $4
        WHERE "taskId" = $1 AND "formId" = $2`,
-    [taskId, req.form.idForm, req.idUser, req.form.isRequired]
+    [taskId, req.form.idForm, user.userName, req.form.isRequired]
   );
 };
 
-exports.deleteAssociateTypeTask = async (params, userId) => {
+exports.deleteAssociateTypeTask = async (params) => {
   return await db.query(
     `DELETE FROM "formsTypeTasks" 
     WHERE "taskId" = $2 AND "formId" = $1`,
@@ -375,11 +383,11 @@ exports.deleteAssociateTypeTask = async (params, userId) => {
   );
 };
 
-exports.deleteForm = async (params, userId) => {
+exports.deleteForm = async (params, user) => {
   return await db.query(
-    `UPDATE forms set deleted = true, modification = now()
+    `UPDATE forms set deleted = true, modification = now(), user_modification = $2
     WHERE id = $1`,
-    [params.formId]
+    [params.formId, user.userName]
   );
 };
 

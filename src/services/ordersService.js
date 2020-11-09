@@ -17,7 +17,7 @@ exports.saveTypeOrderAndTask = async (req, res) => {
     if (validate.error) {
       throw validate.error;
     }
-    await orderModel.saveTypeOrderAndTask(req.body);
+    await orderModel.saveTypeOrderAndTask(req.body, req.userLoged);
     res.status(201).json({
       status: 201,
       message: 'lbl_resp_succes',
@@ -62,7 +62,11 @@ exports.updateTypeOrderAndTask = async (req, res) => {
     if (validate.error) {
       throw validate.error;
     }
-    await orderModel.updateTypeOrderAndTask(req.body, req.params.idTypeOrder);
+    await orderModel.updateTypeOrderAndTask(
+      req.body,
+      req.params.idTypeOrder,
+      req.userLoged
+    );
     res.status(200).json({
       status: 200,
       message: 'lbl_resp_succes',
@@ -86,7 +90,7 @@ exports.deleteTypeOrderAndTask = async (req, res) => {
     if (validate.error) {
       throw validate.error;
     }
-    await orderModel.deleteTypeOrderAndTask(req.params);
+    await orderModel.deleteTypeOrderAndTask(req.params, req.userLoged);
     res.status(200).json({
       status: 200,
       message: 'lbl_resp_succes',

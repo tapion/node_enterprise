@@ -79,7 +79,8 @@ exports.create = wrapAsyncFn(async (req, res) => {
   const { body, sec, quest } = await formModel.CreateForm(
     req.body,
     sections,
-    questions
+    questions,
+    req.userLoged
   );
   prepareResponse(body.elements, sec);
   prepareResponse(body.elements, quest);
@@ -104,12 +105,13 @@ exports.updateForm = wrapAsyncFn(async (req, res) => {
     req.body,
     sections,
     questions,
-    req.params.formId
+    req.params.formId,
+    req.userLoged
   );
   prepareResponse(body.elements, sec);
   prepareResponse(body.elements, quest);
-  res.status(201).json({
-    status: 201,
+  res.status(200).json({
+    status: 200,
     message: 'lbl_resp_succes',
     serverTime: Date.now(),
     data: body,
@@ -124,7 +126,7 @@ exports.deleteForm = wrapAsyncFn(async (req, res) => {
   if (validate.error) {
     throw validate.error;
   }
-  await formModel.deleteForm(req.params, '@pendingToken');
+  await formModel.deleteForm(req.params, req.userLoged);
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
@@ -257,7 +259,7 @@ exports.assosiateTypeTask = wrapAsyncFn(async (req, res) => {
   if (validate.error) {
     throw validate.error;
   }
-  await formModel.associateTypeTask(req.body);
+  await formModel.associateTypeTask(req.body, req.userLoged);
   res.status(201).json({
     status: 201,
     message: 'lbl_resp_succes',
@@ -279,7 +281,11 @@ exports.editFormsByTask = wrapAsyncFn(async (req, res) => {
     throw validate.error;
   }
   req.body.idTask = req.params.idTask * 1;
-  await formModel.updateAssociateTypeTask(req.params.idTask, req.body);
+  await formModel.updateAssociateTypeTask(
+    req.params.idTask,
+    req.body,
+    req.userLoged
+  );
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
@@ -297,15 +303,7 @@ exports.deleteFormsByTask = wrapAsyncFn(async (req, res) => {
   if (validate.error) {
     throw validate.error;
   }
-  // TODO: MEJORAR CUANDO SE TENGA EL TEMA DE SEGURIDAD
-  // schema = Joi.object({
-  //   idUser: Joi.string().required(),
-  // });
-  // validate = schema.validate(req.body);
-  // if (validate.error) {
-  //   throw validate.error;
-  // }
-  await formModel.deleteAssociateTypeTask(req.params, '@pendingToken');
+  await formModel.deleteAssociateTypeTask(req.params);
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
