@@ -9,7 +9,7 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/innoBoky/bokyLog/1.0.0
   - description: SwaggerHub API Auto Mocking
-    url: http://ec2-3-91-103-109.compute-1.amazonaws.com:3000
+    url: http://107.21.130.194:3000
 tags:
   - name: Operators
     description: Everything about the employees that are operators
@@ -32,6 +32,73 @@ tags:
   - name: Work Flows
     description: All information about the work flow defined by the company
 paths:
+  /countries/{isoCountry}/cities:
+    get:
+      tags:
+        - Countries
+      summary: Get all cities by a iso's country cod
+      operationId: citiesBycountry
+      parameters:
+        - name: isoCountry
+          in: path
+          description: Iso country code
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        city: 
+                          type: string
+                        zone:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /countries/:
+    get:
+      tags:
+        - Countries
+      summary: Get all countries
+      operationId: getCountries
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        isoCod:
+                          type: string
+                        name:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /operators/{operatorId}/workOrders:
     get:
       tags:
@@ -78,7 +145,7 @@ paths:
                             $ref: '#/components/schemas/Forms'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /auth/login:
+  /users/login:
     post:
       tags:
         - Auth
@@ -91,7 +158,7 @@ paths:
             schema:
               type: object
               properties:
-                user:
+                email:
                   type: string
                   maxLength: 50
                 password:
@@ -110,9 +177,52 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/UserBasicInfo'
+                    properties:
+                      token:
+                        type: string
+                      refresh-token:
+                        type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /users/refreshToken:
+    post:
+      tags:
+        - Auth
+      summary: Refresh acces token
+      operationId: refreshToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh-token:
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    properties:
+                      token:
+                        type: string
+                      refresh-token:
+                        type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '408':
+          $ref: '#/components/responses/LoginRequired'
   /forms:
     post:
       tags:
@@ -141,6 +251,12 @@ paths:
                     $ref: '#/components/schemas/Forms'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '407':
+          $ref: '#/components/responses/TokenExpired'
     get:
       tags:
         - Forms
@@ -670,37 +786,6 @@ paths:
                       $ref: '#/components/schemas/Permissions'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /users/{userId}/notifications:
-    get:
-      tags:
-        - Users
-      summary: Notifications by user
-      description: Get an array of all notifications that a user has
-      operationId: NotificationsByUser
-      parameters:
-        - name: userId
-          in: path
-          description: User id
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Notifications'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
   /notifications/{notificationId}:
     get:
       tags:
@@ -793,10 +878,10 @@ paths:
                     $ref: '#/components/schemas/GeneralOrdersInformation'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /clients/:
+  /customers/:
     post:
       tags:
-        - Clients
+        - Customers
       summary: Create new clients
       description: Create new clients
       operationId: clientsCreate
@@ -823,7 +908,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
     get:
       tags:
-        - Clients
+        - Customers
       summary: List of clients
       operationId: clientsList
       responses:
@@ -842,6 +927,89 @@ paths:
                       $ref: '#/components/schemas/Clients'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /customers/{idCustomer}/:
+    delete:
+      tags:
+        - Customers
+      summary: Delete a client
+      operationId: clientsDelete
+      parameters:
+        - name: idCustomer
+          in: path
+          description: CustomerId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      tags:
+        - Customers
+      summary: Get an especific customer
+      operationId: clientsById
+      parameters:
+        - name: idCustomer
+          in: path
+          description: CustomerId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Clients'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - Customers
+      summary: Update an especific customer
+      operationId: clientUpdateById
+      parameters:
+        - name: idCustomer
+          in: path
+          description: CustomerId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Clients'
+        description: Update a form
+        required: true
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Clients'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   /operators/:
     get:
       tags:
@@ -1001,10 +1169,42 @@ paths:
                       $ref: '#/components/schemas/WorksFlow'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '407':
+          $ref: '#/components/responses/TokenExpired'
+        '408':
+          $ref: '#/components/responses/LoginRequired'
 components:
   responses:
     Unauthorized:
-      description: Unauthorized
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden acces
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resourse does not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TokenExpired:
+      description: Access token has expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    LoginRequired:
+      description: Refresh token has expired, Shall login
       content:
         application/json:
           schema:
@@ -1086,13 +1286,18 @@ components:
           type: string
         businessName:
           type: string
-        adress:
+        address:
           type: string
+        country:
+          type: string
+          maxLength: 2
+        city:
+          type: integer
         phone:
           type: string
         email:
           type: string
-        status:
+        state:
           type: boolean
         contacts:
           type: array
@@ -1111,12 +1316,13 @@ components:
                 type: string
               address:
                 type: string
+              country:
+                type: string
+                maxLength: 2
+              city:
+                type: integer
               phone:
                 type: string
-              name:
-                type: string
-              isPrincipal:
-                type: boolean
               status:
                 type: boolean
               contacts:
@@ -1208,29 +1414,6 @@ components:
       required:
         - code
         - message
-    UserBasicInfo:
-      type: object
-      description: Basic user information
-      properties:
-        id:
-          type: integer
-        user:
-          type: string
-          maxLength: 50
-        fullNameUser:
-          type: string
-          maxLength: 250
-        image:
-          type: string
-          format: byte
-          description: Base64 image
-        lastLogin:
-          type: string
-          format: date-time
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Rol'
     Rol:
       type: object
       description: System rol
@@ -1518,7 +1701,6 @@ components:
           type: string
         isRequired:
           type: boolean
-        # El atributo "posibilities" se cambia por source.values
         source:
           $ref: '#/components/schemas/FormsQuestionsSources'
     FormsQuestionsSources:

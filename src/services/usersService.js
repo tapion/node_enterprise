@@ -3,12 +3,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/usersModel');
 const wrapAsyncFn = require('../utils/wrapAsyncFunction');
+const auth = require('./auth');
+const AppError = require('../utils/appError');
 
 const validatePassword = async (possiblePassword, password) => {
   return await bcrypt.compare(possiblePassword, password);
 };
 
-const createToken = (user) => {
+const createToken = (user, expiredTime) => {
   return jwt.sign(
     {
       email: user.email,
@@ -17,7 +19,7 @@ const createToken = (user) => {
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: process.env.JWT_EXPIRE_IN,
+      expiresIn: expiredTime,
     }
   );
 };
@@ -36,12 +38,36 @@ exports.login = wrapAsyncFn(async (req, res) => {
     user.rows.length <= 0 ||
     !validatePassword(req.body.password, user.rows[0].password)
   )
-    throw new Error('User or email invalid', 403);
+    throw new AppError('User or email invalid', 403);
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
     serverTime: Date.now(),
-    data: { token: createToken(user.rows[0]) },
+    data: {
+      token: createToken(user.rows[0], process.env.JWT_EXPIRE_IN),
+      'refresh-token': createToken(
+        user.rows[0],
+        process.env.JWT_EXPIRE_REFRESH
+      ),
+    },
+  });
+});
+
+exports.refreshToken = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    'refresh-token': Joi.string().required(),
+  });
+  const validate = schema.validate(req.body);
+  if (validate.error) throw validate.error;
+  const user = await auth.validateRefreshToken(req.body['refresh-token']);
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: {
+      token: createToken(user.rows[0], process.env.JWT_EXPIRE_IN),
+      refresh: req.body['refresh-token'],
+    },
   });
 });
 

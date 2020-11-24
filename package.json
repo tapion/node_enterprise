@@ -7,6 +7,7 @@
   "description": "API for bokyLog app",
   "main": "index.js",
   "scripts": {
+    "win": "SET NODE_ENV=development & nodemon src/app.js",
     "start": "NODE_ENV=development nodemon src/app.js",
     "start:qa": "NODE_ENV=development node src/app.js",
     "start:prod": "NODE_ENV=production node src/app.js"
@@ -40,6 +41,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.20.0",
+    "nodemon": "^2.0.6",
     "prettier": "^2.0.5"
   }
 }

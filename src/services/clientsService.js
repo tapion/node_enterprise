@@ -123,3 +123,14 @@ exports.updateCustomer = wrapAsyncFn(async (req, res) => {
     data: newClient,
   });
 });
+
+
+exports.officessByCustomer = wrapAsyncFn(async (req, res) => {
+  const offices = await clientModel.getOfficessByCustomer(req.params.idCustomer);
+  res.status(201).json({
+    status: 201,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: offices.rows,
+  });
+});

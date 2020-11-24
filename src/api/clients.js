@@ -16,4 +16,7 @@ router
     clientService.updateCustomer
   )
   .delete(clientService.validaCostumerIdParam, clientService.deleteCustomer);
+router
+  .route('/:idCustomer/offices')
+  .get(clientService.validaCostumerIdParam, clientService.officessByCustomer)
 module.exports = router;

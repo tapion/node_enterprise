@@ -239,6 +239,7 @@ exports.deleteCustomer = async (costumerId, user) => {
     [costumerId, user.userName]
   );
 };
+
 exports.updateClient = async (body, user) => {
   return await db.transactions(async (client) => {
     const mainOffice = await updateOffices(client, body, user);
@@ -256,3 +257,22 @@ exports.updateClient = async (body, user) => {
     return respOffice;
   });
 };
+
+exports.getOfficessByCustomer = async(customerId) => {
+  return await db.query(`SELECT
+  c.id ,
+  c."document" as nit,
+  c."name"  as "businessName",
+  c.address as address ,
+  c.email ,
+  c.phone ,
+  c3."name" as country,
+  c2.city
+  ,c.status as state
+  FROM customers c 
+  inner join customers c4 on c4.id = c."customerId" and c4.deleted = false
+  INNER JOIN cities c2 ON c2.id = c."cityId" AND c2.deleted = FALSE AND c2.state = TRUE 
+  INNER JOIN countries c3 ON c3.deleted = FALSE AND c3.state = TRUE AND c3.iso = c2."countryIso" 
+  WHERE c."customerId" = $1 and c.deleted = FALSE 
+  ORDER BY c."name"`, [customerId]);
+}

@@ -5,19 +5,21 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-    command: sh -c "npm install --production && npm run start:qa"
+    command: sh -c "npm install && npm run start"
     ports:
       - 3000:3000
-#   postgres:
-#     container_name: postgres
-#     image: postgres:latest
-#     environment:
-#          - POSTGRES_USER=postgres
-#          - POSTGRES_PASSWORD=postgress
-#          - POSTGRES_DB=postgres
-#     volumes:
-#       - pgdata:/var/lib/postgresql/data
-#     ports:
-#       - 5432:5432
-# volumes:
-#   pgdata:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+         - POSTGRES_USER=postgres
+         - POSTGRES_PASSWORD=postgress
+         - POSTGRES_DB=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+volumes:
+  pgdata:
