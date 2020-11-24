@@ -45,6 +45,7 @@ exports.login = wrapAsyncFn(async (req, res) => {
     serverTime: Date.now(),
     data: {
       token: createToken(user.rows[0], process.env.JWT_EXPIRE_IN),
+      operatorId: 50,
       'refresh-token': createToken(
         user.rows[0],
         process.env.JWT_EXPIRE_REFRESH
