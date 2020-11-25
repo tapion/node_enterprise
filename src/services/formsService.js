@@ -110,8 +110,8 @@ exports.updateForm = wrapAsyncFn(async (req, res) => {
   );
   prepareResponse(body.elements, sec);
   prepareResponse(body.elements, quest);
-  res.status(200).json({
-    status: 200,
+  res.status(201).json({
+    status: 201,
     message: 'lbl_resp_succes',
     serverTime: Date.now(),
     data: body,
