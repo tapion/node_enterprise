@@ -6,7 +6,7 @@ dotenv.config({ path: './config.env' });
 exports.getWorkOrderByOperator = async (operatorId) => {
   return await db.query(
     `SELECT 
-          two.id AS "taskId"
+          two."orderTypeTaskId" AS "taskId"
           ,task.name AS "taskName"
           ,wo.id
           ,wo."orderTypeId" AS "idTypeOT"
