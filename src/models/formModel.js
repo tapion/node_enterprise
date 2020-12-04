@@ -238,19 +238,17 @@ exports.getFormById = async (formId) => {
 
 exports.getFormsByTaskId = async (taskId) => {
   return await db.query(
-    `SELECT
-        f2.id,
-        f2."name",
-        f2.description,
-        f2.state,
-        f2.user_creation
-        ,ftt.required 
-      FROM
-        "formsTypeTasks" ftt
-      INNER JOIN forms f2 ON f2.id = ftt."formId" AND f2.state = TRUE  AND f2.deleted = FALSE 
-      WHERE
-        ftt."taskId" = $1 AND ftt.state = TRUE  AND ftt.deleted = FALSE
-        ORDER BY f2."name"  `,
+    `select f2.id,
+          f2."name",
+          f2.description,
+          f2.state,
+          f2.user_creation
+          ,ftt.required 
+      from "orderTypeTask" ott  
+      left join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" 
+      left JOIN forms f2 ON f2.id = ftt."formId" AND f2.state = TRUE  AND f2.deleted = false
+      where ott.id = $1
+      ORDER BY f2."name"`,
     [taskId]
   );
 };

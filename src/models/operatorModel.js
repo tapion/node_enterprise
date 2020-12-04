@@ -14,10 +14,11 @@ exports.getWorkOrderByOperator = async (operatorId) => {
           ,wo."clientId"
           ,wo."placesId"
           ,wo."statusId" AS "stateId"
-          ,c2."name" AS "stateDescription"
+          ,c2."name" AS "stateDescription",two.*
       FROM "taskWorkOrder" two 
-      INNER JOIN "workOrder" wo ON two."workOrderId" = wo.id
-      INNER JOIN catalogue task ON task.id = two."orderTypeTaskId" 
+      inner JOIN "workOrder" wo ON two."workOrderId" = wo.id
+      inner join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" 
+      INNER JOIN catalogue task ON task.id = ott."taskId" 
       INNER JOIN catalogue c ON c.id  = wo."orderTypeId" AND c.catalog_id = 93
       INNER JOIN catalogue c2 ON c2.id  = wo."statusId" 
       WHERE two."operatorId" = $1
