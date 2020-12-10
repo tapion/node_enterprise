@@ -37,12 +37,12 @@ exports.validateRefreshToken = async (accessTkn) => {
       user.rows[0].changedPasswordAt &&
       tokenData.iat < user.rows[0].changedPasswordAt.getTime() / 1000
     ) {
-      throw new AppError('Undefined token error', 500);
+      throw new AppError('Undefined token error', 401);
     }
     return user;
   }catch(e){
-    if(e.name === 'TokenExpiredError') throw new AppError('Invalids token', 408);
-    throw new AppError('Invalids token', 408);  
+    if(e.name === 'TokenExpiredError') throw new AppError('Invalids token', 401);
+    throw new AppError('Invalids token', 500);  
   }
 };
 
@@ -65,12 +65,12 @@ exports.getVerifyMiddleware = wrapAsyncFn(async (req, res, next) => {
       user.rows[0].changedPasswordAt &&
       tokenData.iat < user.rows[0].changedPasswordAt.getTime() / 1000
     ) {
-      return next(new AppError('Token expired', 407));
+      return next(new AppError('Token expired', 400));
     }
     req.userLoged = tokenData;
     next();
   }catch(e){
-    if(e.name === 'TokenExpiredError') return next(new AppError('Token expired', 407));
+    if(e.name === 'TokenExpiredError') return next(new AppError('Token expired', 400));
     return next(new AppError('Undefined token error', 500));  
   }
 });
