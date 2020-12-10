@@ -67,7 +67,7 @@ exports.refreshToken = wrapAsyncFn(async (req, res) => {
     serverTime: Date.now(),
     data: {
       token: createToken(user.rows[0], process.env.JWT_EXPIRE_IN),
-      refresh: req.body['refresh-token'],
+      'refresh-token': req.body['refresh-token'],
     },
   });
 });
