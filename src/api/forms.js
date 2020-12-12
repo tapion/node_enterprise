@@ -9,6 +9,9 @@ router
   .get(formService.validateTaskId, formService.getFormsByTask)
   .put(formService.validateTaskId, formService.editFormsByTask);
 router
+  .route('/types-order/:typeOrder')
+  .get(formService.getFormsByTypeOrder);
+router
   .route('/task-types/:idTask/:idForm')
   .delete(formService.deleteFormsByTask);
 

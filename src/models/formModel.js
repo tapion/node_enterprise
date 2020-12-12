@@ -210,7 +210,7 @@ exports.CreateForm = async (body, sec, quest, user) => {
 
 exports.updateForm = async (body, sec, quest, parentFormId, user) => {
   quest = await createCatalogs(quest, user);
-  return await db.transactions(async (client) => {
+  return db.transactions(async (client) => {
     await client.query(
       'UPDATE forms set deleted = true,user_modification = $2, modification=now() where id = $1',
       [parentFormId, user.userName]
@@ -230,14 +230,14 @@ exports.updateForm = async (body, sec, quest, parentFormId, user) => {
 };
 
 exports.getFormById = async (formId) => {
-  return await db.query(
+  return db.query(
     'SELECT id, "name", description, state, user_creation FROM forms WHERE id = $1 AND deleted = FALSE',
     [formId]
   );
 };
 
 exports.getFormsByTaskId = async (taskId) => {
-  return await db.query(
+  return db.query(
     `select f2.id,
           f2."name",
           f2.description,
@@ -345,7 +345,7 @@ exports.getQuestionsBySection = async (sectionId) => {
       ORDER BY qu.id`,
     [sectionId]
   );
-  return await Promise.all(
+  return Promise.all(
     questions.rows.map(async (q) => {
       q.possibilities = await buildSourceFromCatalog(q.source_idtable);
       return q;
@@ -400,4 +400,29 @@ exports.getFormsByTask = async (taskId) => {
     [taskId]
   );
   return associate;
+};
+
+exports.getFormByTypeOrder = async (typeOrderId) => {
+  const formsRecordSet = await db.query(
+    `select distinct ftt."formId"
+        ,f2."name" 
+        ,f2.description
+      from "orderTypeTask" ott 
+      inner join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" 
+      inner join forms f2 on f2.id = ftt."formId" 
+      where ott."orderTypeId"  = $1
+      order by f2."name"`,
+    [typeOrderId]
+  );
+  await Promise.all(
+    formsRecordSet.rows.map(async (frm) => {
+      const sectionsRecordSet = await exports.getSectionsByForm(frm.formId);
+      frm.sections = await Promise.all(
+        sectionsRecordSet.rows.map(async (sect) => {
+          return { section: sect.id, questions: await exports.getQuestionsBySection(sect.id)};
+        })
+      );
+    })
+  );
+  return formsRecordSet.rows;
 };

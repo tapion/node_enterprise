@@ -1,6 +1,7 @@
 const Joi = require('@hapi/joi');
 const formModel = require('../models/formModel');
 const wrapAsyncFn = require('../utils/wrapAsyncFunction');
+const AppError = require('../utils/appError');
 
 const sectionId = 6;
 const getSections = (body) => {
@@ -241,6 +242,29 @@ exports.getFormsByTask = wrapAsyncFn(async (req, res) => {
       idTask: req.params.idTask,
       forms: form.rows || 0,
     },
+  });
+});
+
+exports.getFormsByTypeOrder = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    typeOrder: Joi.number().integer().min(1).required(),
+  });
+  const validate = schema.validate(req.params);
+  if (validate.error) {
+    throw validate.error;
+  }
+  const forms = await formModel.getFormByTypeOrder(req.params.typeOrder);
+  if (forms.rowCount === 0) {
+    throw new AppError(
+      `Not found forms for Type Order: ${req.params.typeOrder}`,
+      404
+    );
+  }
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: forms,
   });
 });
 
