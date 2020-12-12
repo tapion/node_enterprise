@@ -1,8 +1,8 @@
 const Joi = require('@hapi/joi');
 const templateModel = require('./../models/templatesModel');
+const wrapAsyncFn = require('../utils/wrapAsyncFunction');
 
-exports.saveTemplate = async (req, res) => {
-  try {
+exports.saveTemplate =  wrapAsyncFn(async (req, res) => {
     const shema = Joi.object({
         id: Joi.number().integer().allow(null).empty(''),
         name: Joi.string().required(),
@@ -21,12 +21,6 @@ exports.saveTemplate = async (req, res) => {
         status: 201,
         message: 'lbl_resp_succes',
         serverTime: Date.now(),
-      data: templareResponse,
+        data: templareResponse,
     });
-  } catch (err) {
-    res.status(500).json({
-      message: 'error',
-      body: err.message,
-    });
-  }
-};
+});
