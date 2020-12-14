@@ -11,7 +11,6 @@ exports.saveTemplate = async (body,user) => {
 }
 
 exports.updateTemplate = async (id,body,user) => {
-    console.log(id);
     return db.query(
         `UPDATE templates 
         SET 

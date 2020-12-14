@@ -77,7 +77,7 @@ exports.getTemplatesById = wrapAsyncFn(async (req,res) => {
         status: 200,
         message: 'lbl_resp_succes',
         serverTime: Date.now(),
-        data: template.rows,
+        data: template.rows[0],
     });
 });
 
