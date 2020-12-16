@@ -11,6 +11,7 @@ exports.templateDataValidation = (req,res, next) => {
         description: Joi.string().required(),
         template: Joi.string().required(),
         state: Joi.boolean().required(),
+        orderTypeId: Joi.number().integer().min(1).required(),
     });
     const validate = shema.validate(req.body);
     if (validate.error) {
@@ -52,8 +53,8 @@ exports.updateTemplate =  wrapAsyncFn(async (req, res) => {
     await templateModel.updateTemplate(req.params.idTemplate,req.body,req.userLoged)
     const templareResponse = { ...req.body}
     templareResponse.id = req.params.idTemplate;
-    res.status(201).json({
-        status: 201,
+    res.status(200).json({
+        status: 200,
         message: 'lbl_resp_succes',
         serverTime: Date.now(),
         data: templareResponse,
@@ -73,6 +74,12 @@ exports.getAllTemplates = wrapAsyncFn(async (req,res) => {
 
 exports.getTemplatesById = wrapAsyncFn(async (req,res) => {
     const template = await templateModel.getTemplatesById(req.params.idTemplate)
+    if(template.rows.length <= 0){
+        throw new AppError(
+            `Not found template for id: ${req.params.idTemplate}`,
+            404
+        );
+    }
     res.status(200).json({
         status: 200,
         message: 'lbl_resp_succes',
