@@ -404,7 +404,7 @@ exports.getFormsByTask = async (taskId) => {
 
 exports.getFormByTypeOrder = async (typeOrderId) => {
   const formsRecordSet = await db.query(
-    `select distinct ftt."formId"
+    `select distinct ftt."formId" as id
         ,f2."name" 
         ,f2.description
       from "orderTypeTask" ott 
@@ -416,7 +416,7 @@ exports.getFormByTypeOrder = async (typeOrderId) => {
   );
   await Promise.all(
     formsRecordSet.rows.map(async (frm) => {
-      const sectionsRecordSet = await exports.getSectionsByForm(frm.formId);
+      const sectionsRecordSet = await exports.getSectionsByForm(frm.id);
       frm.sections = await Promise.all(
         sectionsRecordSet.rows.map(async (sect) => {
           return { section: sect.id, questions: await exports.getQuestionsBySection(sect.id)};
