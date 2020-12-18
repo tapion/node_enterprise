@@ -419,7 +419,7 @@ exports.getFormByTypeOrder = async (typeOrderId) => {
       const sectionsRecordSet = await exports.getSectionsByForm(frm.id);
       frm.sections = await Promise.all(
         sectionsRecordSet.rows.map(async (sect) => {
-          return { section: sect.id, questions: await exports.getQuestionsBySection(sect.id)};
+          return { name: sect.title, questions: await exports.getQuestionsBySection(sect.id)};
         })
       );
     })
