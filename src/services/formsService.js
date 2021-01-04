@@ -180,7 +180,7 @@ exports.getForm = wrapAsyncFn(async (req, res) => {
   }
   const form = await formModel.getFormById(req.params.formId);
   if (form.rowCount === 0) {
-    throw new Error(`Not found form id: ${req.params.formId}`);
+    throw new AppError(`Not found form id: ${req.params.formId}`,404);
   }
   const sectionsResponse = await formModel.getSectionsByForm(req.params.formId);
   const questionsResponse = await formModel.getQuestionsByForm(
@@ -207,7 +207,7 @@ exports.getForm = wrapAsyncFn(async (req, res) => {
 exports.getAll = wrapAsyncFn(async (req, res) => {
   const form = await formModel.getAllForms();
   if (form.rowCount === 0) {
-    throw new Error(`Not found forms`);
+    throw new AppError(`Not found forms`,404);
   }
   res.status(200).json({
     status: 200,
