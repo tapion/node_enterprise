@@ -9,12 +9,14 @@ router
   .get(formService.validateTaskId, formService.getFormsByTask)
   .put(formService.validateTaskId, formService.editFormsByTask);
 router
-  .route('/types-order/:typeOrder')
-  .get(formService.getFormsByTypeOrder);
+  .route('/task/:taskId')
+  .get(formService.getFormsByTaskPerUser);
 router
   .route('/task-types/:idTask/:idForm')
   .delete(formService.deleteFormsByTask);
-
+router
+  .route('/task-types/:idTask/:idForm')
+  .delete(formService.deleteFormsByTask);
 router
   .route('/')
   .post(formService.validateForm, formService.create)

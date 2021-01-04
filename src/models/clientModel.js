@@ -217,7 +217,7 @@ exports.getCustomerById = async (customerId) => {
   WHERE c.deleted = FALSE AND c."customerId" IS NULL AND c.id = $1`,
     [customerId]
   );
-  if (mainOffice.rows <= 0) throw new AppError('Customer does not exist', 404);
+  if (mainOffice.rows <= 0) throw new AppError('Customer does not exist', 200);
   const mainContacts = await getContactsByOffice(customerId);
   const otherOffices = await getOfficesByParent(customerId);
   const offices = await Promise.all(

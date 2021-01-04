@@ -180,7 +180,7 @@ exports.getForm = wrapAsyncFn(async (req, res) => {
   }
   const form = await formModel.getFormById(req.params.formId);
   if (form.rowCount === 0) {
-    throw new AppError(`Not found form id: ${req.params.formId}`,404);
+    throw new AppError(`Not found form id: ${req.params.formId}`,200);
   }
   const sectionsResponse = await formModel.getSectionsByForm(req.params.formId);
   const questionsResponse = await formModel.getQuestionsByForm(
@@ -207,7 +207,7 @@ exports.getForm = wrapAsyncFn(async (req, res) => {
 exports.getAll = wrapAsyncFn(async (req, res) => {
   const form = await formModel.getAllForms();
   if (form.rowCount === 0) {
-    throw new AppError(`Not found forms`,404);
+    throw new AppError(`Not found forms`,200);
   }
   res.status(200).json({
     status: 200,
@@ -257,7 +257,30 @@ exports.getFormsByTypeOrder = wrapAsyncFn(async (req, res) => {
   if (forms.rowCount === 0) {
     throw new AppError(
       `Not found forms for Type Order: ${req.params.typeOrder}`,
-      404
+      200
+    );
+  }
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: forms,
+  });
+});
+
+exports.getFormsByTaskPerUser = wrapAsyncFn(async (req, res) => {
+  const schema = Joi.object({
+    taskId: Joi.number().integer().min(1).required(),
+  });
+  const validate = schema.validate(req.params);
+  if (validate.error) {
+    throw validate.error;
+  }
+  const forms = await formModel.getFormByTask(req.params.taskId);
+  if (forms.rowCount === 0) {
+    throw new AppError(
+      `Not found forms for Task: ${req.params.taskId}`,
+      200
     );
   }
   res.status(200).json({

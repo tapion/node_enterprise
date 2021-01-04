@@ -426,3 +426,27 @@ exports.getFormByTypeOrder = async (typeOrderId) => {
   );
   return formsRecordSet.rows;
 };
+
+exports.getFormByTask = async (taskId) => {
+  const formsRecordSet = await db.query(
+    `select ftt."formId" 
+        ,f2."name" 
+          ,f2.description
+      from "formsTypeTasks" ftt 
+      inner join forms f2 on f2.id = ftt."formId" 
+      where ftt."taskId" = 2
+      order by f2."name"`,
+    [taskId]
+  );
+  await Promise.all(
+    formsRecordSet.rows.map(async (frm) => {
+      const sectionsRecordSet = await exports.getSectionsByForm(frm.id);
+      frm.sections = await Promise.all(
+        sectionsRecordSet.rows.map(async (sect) => {
+          return { name: sect.title, questions: await exports.getQuestionsBySection(sect.id)};
+        })
+      );
+    })
+  );
+  return formsRecordSet.rows;
+};

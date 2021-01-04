@@ -48,7 +48,7 @@ exports.updateTemplate =  wrapAsyncFn(async (req, res) => {
     if(template.rows.length <= 0)
         throw new AppError(
             `Not found template for id: ${req.params.idTemplate}`,
-            404
+            200
         );
     await templateModel.updateTemplate(req.params.idTemplate,req.body,req.userLoged)
     const templareResponse = { ...req.body}
@@ -77,7 +77,7 @@ exports.getTemplatesById = wrapAsyncFn(async (req,res) => {
     if(template.rows.length <= 0){
         throw new AppError(
             `Not found template for id: ${req.params.idTemplate}`,
-            404
+            200
         );
     }
     res.status(200).json({
