@@ -12,8 +12,8 @@ router
   .route('/task/:taskId')
   .get(formService.getFormsByTaskPerUser);
 router
-  .route('/task-types/:idTask/:idForm')
-  .delete(formService.deleteFormsByTask);
+  .route('/types-order/:typeOrder')
+  .get(formService.getFormsByTypeOrder);
 router
   .route('/task-types/:idTask/:idForm')
   .delete(formService.deleteFormsByTask);
