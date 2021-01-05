@@ -434,7 +434,7 @@ exports.getFormByTask = async (taskId) => {
           ,f2.description
       from "formsTypeTasks" ftt 
       inner join forms f2 on f2.id = ftt."formId" 
-      where ftt."taskId" = 2
+      where ftt."taskId" = $1
       order by f2."name"`,
     [taskId]
   );

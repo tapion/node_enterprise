@@ -4,7 +4,7 @@ const db = require('../db');
 dotenv.config({ path: './config.env' });
 
 exports.getWorkOrderByOperator = async (operatorId) => {
-  return await db.query(
+  return db.query(
     `SELECT 
           two."orderTypeTaskId" AS "taskId"
           ,task.name AS "taskName"
@@ -26,3 +26,20 @@ exports.getWorkOrderByOperator = async (operatorId) => {
     [operatorId]
   );
 };
+exports.getTasksByUser = async (operatorId) => {
+  return db.query(
+    `select c.id as "idTask",
+        c."name" as "nameTask",
+        to2.id as "idOrder",
+        to2."name" as "nameOrder",
+        to2.description,
+        two.status as "state"
+      from "taskWorkOrder" two 
+      inner join "taskOrder" to2 on to2.id = two."workOrderId" 
+      inner join "orderTypeTask" ott on ott."orderTypeId" = two.id 
+      inner join catalogue c on c.id = ott."taskId" 
+      where two."editionOnWeb" = true
+      order by c."name", to2."name",two.status`
+  );
+};
+

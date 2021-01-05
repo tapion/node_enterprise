@@ -3,6 +3,9 @@ const dotenv = require('dotenv');
 const formModel = require('../models/formModel');
 const operatorModel = require('../models/operatorModel');
 const catalogueModel = require('../models/catalogueModel');
+const wrapAsyncFn = require('../utils/wrapAsyncFunction');
+const AppError = require('../utils/appError');
+
 
 dotenv.config({ path: './config.env' });
 
@@ -78,13 +81,30 @@ const assignBurnData = (ot) => {
 
 const formsByTaskId = async (typeOrder) => {
   const form = await formModel.getFormsByTaskId(typeOrder);
-  return await Promise.all(
+  return Promise.all(
     form.rows.map(async (frm) => {
       frm.sections = await buildFormForMobile(frm);
       return frm;
     })
   );
 };
+
+
+exports.getTasksByUser = wrapAsyncFn(async (req, res) => {
+  const operator = await operatorModel.getTasksByUser(req.userLoged.userName);
+  if(operator.rows.length <= 0)
+        throw new AppError(
+            `Not found tasks for user: ${req.userLoged.userName}`,
+            200
+  );
+  res.status(200).json({
+    status: 200,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: operator.rows,
+  });
+});
+
 
 exports.workOrders = async (req, res) => {
   try {
