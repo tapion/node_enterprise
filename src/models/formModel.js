@@ -245,8 +245,8 @@ exports.getFormsByTaskId = async (taskId) => {
           f2.user_creation
           ,ftt.required 
       from "orderTypeTask" ott  
-      left join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" 
-      left JOIN forms f2 ON f2.id = ftt."formId" AND f2.state = TRUE  AND f2.deleted = false
+      inner join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" 
+      inner JOIN forms f2 ON f2.id = ftt."formId" AND f2.state = TRUE  AND f2.deleted = false
       where ott.id = $1
       ORDER BY f2."name"`,
     [taskId]
@@ -339,7 +339,7 @@ exports.getQuestionsBySection = async (sectionId) => {
           qu.conditions as condition
           , qu.placeholder
           , qu.readonly
-          , qu.defaultvalue as value 
+          , case when qu.defaultvalue = '' then null else qu.defaultvalue end as value 
         FROM questions qu 
       WHERE qu.section_id = $1 AND qu.deleted = FALSE
       ORDER BY qu.id`,
