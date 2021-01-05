@@ -4,8 +4,10 @@ const sendDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.statusCode,
     message: err.message,
+    serverTime: Date.now(),
     description: err.description,
     stack: err.stack,
+    data: [],
   });
 };
 
@@ -13,7 +15,9 @@ const sendProd = (err, res) => {
   if (err.operational) {
     res.status(err.statusCode).json({
       status: err.status,
+      serverTime: Date.now(),
       message: err.message,
+      data: [],
     });
   } else {
     console.log('Error!!!!!', err);
