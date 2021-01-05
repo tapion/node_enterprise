@@ -14,7 +14,18 @@ exports.getWorkOrderByOperator = async (operatorId) => {
           ,wo."clientId"
           ,wo."placesId"
           ,wo."statusId" AS "stateId"
-          ,c2."name" AS "stateDescription",two.*
+          ,c2."name" AS "stateDescription"
+          ,two."orderTypeTaskId"
+          ,two."operatorId"
+          ,two."creationUser"
+          ,two."creationDate"
+          ,two."modificationUser"
+          ,two."modificationDate"
+          ,two."workOrderId"
+          ,two."closeTypeId"
+          ,two."initialDate"
+          ,two."endDate"
+          ,two.status
       FROM "taskWorkOrder" two 
       inner JOIN "workOrder" wo ON two."workOrderId" = wo.id
       inner join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" 
