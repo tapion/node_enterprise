@@ -8,7 +8,7 @@ exports.getWorkOrderByOperator = async (operatorId) => {
     `SELECT 
           two."orderTypeTaskId" AS "taskId"
           ,task.name AS "taskName"
-          ,wo.id
+          ,two.id
           ,wo."orderTypeId" AS "idTypeOT"
           ,c."name" AS "typeOT"
           ,wo."clientId"
