@@ -44,11 +44,12 @@ exports.getTasksByUser = async (operatorId) => {
       wo.id as "idOrder",
       wo."name" as "nameOrder",
       wo.description,
-      two.status as "state"
+      c2."name" as "state"
     from "taskWorkOrder" two 
     inner join "workOrder" wo on wo.id = two."workOrderId" 
     INNER join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" 
     INNER join catalogue c on c.id = ott."taskId" 
+    inner join catalogue c2 on c2.id = two.status
     where two."editionOnWeb" = true
     order by c."name", wo."name",two.status`
   );
