@@ -40,17 +40,17 @@ exports.getWorkOrderByOperator = async (operatorId) => {
 exports.getTasksByUser = async (operatorId) => {
   return db.query(
     `select c.id as "idTask",
-        c."name" as "nameTask",
-        to2.id as "idOrder",
-        to2."name" as "nameOrder",
-        to2.description,
-        two.status as "state"
-      from "taskWorkOrder" two 
-      inner join "taskOrder" to2 on to2.id = two."workOrderId" 
-      inner join "orderTypeTask" ott on ott."orderTypeId" = two.id 
-      inner join catalogue c on c.id = ott."taskId" 
-      where two."editionOnWeb" = true
-      order by c."name", to2."name",two.status`
+      c."name" as "nameTask",
+      wo.id as "idOrder",
+      wo."name" as "nameOrder",
+      wo.description,
+      two.status as "state"
+    from "taskWorkOrder" two 
+    inner join "workOrder" wo on wo.id = two."workOrderId" 
+    INNER join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" 
+    INNER join catalogue c on c.id = ott."taskId" 
+    where two."editionOnWeb" = true
+    order by c."name", wo."name",two.status`
   );
 };
 
