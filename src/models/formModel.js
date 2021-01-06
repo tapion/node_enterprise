@@ -433,14 +433,14 @@ exports.getFormByTask = async (taskId) => {
         ,f2."name" 
           ,f2.description
       from "formsTypeTasks" ftt 
-      inner join forms f2 on f2.id = ftt."formId" 
-      where ftt."taskId" = $1
+      inner join forms f2 on f2.id = ftt."formId" and f2.deleted = false and f2.state = true
+      where ftt."taskId" = $1 and ftt.deleted = false and ftt.state = true
       order by f2."name"`,
     [taskId]
   );
   await Promise.all(
     formsRecordSet.rows.map(async (frm) => {
-      const sectionsRecordSet = await exports.getSectionsByForm(frm.id);
+      const sectionsRecordSet = await exports.getSectionsByForm(frm.formId);
       frm.sections = await Promise.all(
         sectionsRecordSet.rows.map(async (sect) => {
           return { name: sect.title, questions: await exports.getQuestionsBySection(sect.id)};
