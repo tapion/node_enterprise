@@ -408,7 +408,7 @@ exports.getFormByTypeOrder = async (typeOrderId) => {
         ,f2."name" 
         ,f2.description
       from "orderTypeTask" ott 
-      inner join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" 
+      inner join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" and ftt.deleted = false and ftt.state = true
       inner join forms f2 on f2.id = ftt."formId" 
       where ott."orderTypeId"  = $1
       order by f2."name"`,
