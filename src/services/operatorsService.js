@@ -144,7 +144,7 @@ exports.workOrders = async (req, res) => {
         };
         assignBurnData(ot);
         ot.typesClosure = closeTypes;
-        ot.forms = await formsByTaskId(ot.taskId);
+        ot.forms = await formsByTaskId(ot.orderTypeTaskId);
         ot.typeOT = {
           id: ot.idTypeOT,
           type: ot.typeOT,
@@ -155,6 +155,7 @@ exports.workOrders = async (req, res) => {
             }),
         };
         delete ot.idTypeOT;
+        delete ot.orderTypeTaskId;
         return ot;
       })
     );
