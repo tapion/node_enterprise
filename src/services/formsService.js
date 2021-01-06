@@ -276,13 +276,32 @@ exports.getFormsByTaskPerUser = wrapAsyncFn(async (req, res) => {
   if (validate.error) {
     throw validate.error;
   }
-  const forms = await formModel.getFormByTask(req.params.taskId);
-  if (forms.rowCount === 0) {
-    throw new AppError(
-      `Not found forms for Task: ${req.params.taskId}`,
-      200
-    );
-  }
+  const recorsetForms = await formModel.getFormByTask(req.params.taskId);
+  const forms = await Promise.all(recorsetForms.rows.map(async frm => {
+      const form = {};
+      const sectionsResponse = await formModel.getSectionsByForm(frm.formId);
+      const questionsResponse = await formModel.getQuestionsByForm(
+      frm.formId
+      );
+      const sections = buildElements(sectionsResponse.rows);
+      const questions = buildElements(questionsResponse);
+      form.id = frm.formId;
+      form.name = frm.name;
+      form.description = frm.description;
+      form.state= frm.state;
+      form.userName= frm.user_creation;
+      form.elements= orderSectionsAndQuestions(sections, questions);
+      return form;
+  }));
+
+
+
+  // if (forms.rowCount === 0) {
+  //   throw new AppError(
+  //     `Not found forms for Task: ${req.params.taskId}`,
+  //     200
+  //   );
+  // }
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',

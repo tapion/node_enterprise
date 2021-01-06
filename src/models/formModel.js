@@ -428,25 +428,28 @@ exports.getFormByTypeOrder = async (typeOrderId) => {
 };
 
 exports.getFormByTask = async (taskId) => {
-  const formsRecordSet = await db.query(
+  // const formsRecordSet = await db.query(
+  return db.query(
     `select ftt."formId" 
         ,f2."name" 
-          ,f2.description
+        ,f2.description
+        ,f2.state
+        ,f2.user_creation
       from "formsTypeTasks" ftt 
       inner join forms f2 on f2.id = ftt."formId" and f2.deleted = false and f2.state = true
       where ftt."taskId" = $1 and ftt.deleted = false and ftt.state = true
       order by f2."name"`,
     [taskId]
   );
-  await Promise.all(
-    formsRecordSet.rows.map(async (frm) => {
-      const sectionsRecordSet = await exports.getSectionsByForm(frm.formId);
-      frm.sections = await Promise.all(
-        sectionsRecordSet.rows.map(async (sect) => {
-          return { name: sect.title, questions: await exports.getQuestionsBySection(sect.id)};
-        })
-      );
-    })
-  );
+  // await Promise.all(
+  //   formsRecordSet.rows.map(async (frm) => {
+  //     const sectionsRecordSet = await exports.getSectionsByForm(frm.formId);
+  //     frm.sections = await Promise.all(
+  //       sectionsRecordSet.rows.map(async (sect) => {
+  //         return { name: sect.title, questions: await exports.getQuestionsBySection(sect.id)};
+  //       })
+  //     );
+  //   })
+  // );
   return formsRecordSet.rows;
 };
