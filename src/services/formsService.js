@@ -170,6 +170,15 @@ const orderSectionsAndQuestions = (sec, que) => {
   return res;
 };
 
+const orderSectionsAndQuestionsForWeb = (sec, que) => {
+  // let res = [];
+  sec.forEach((section) => {
+    section.questions = que.filter((el) => el.idSection === section.id);
+  });
+  return sec;
+};
+
+
 exports.getForm = wrapAsyncFn(async (req, res) => {
   const schema = Joi.object({
     formId: Joi.number().integer().min(1).required(),
@@ -276,6 +285,7 @@ exports.getFormsByTaskPerUser = wrapAsyncFn(async (req, res) => {
   if (validate.error) {
     throw validate.error;
   }
+  // const forms = await formModel.getFormByTask(req.params.taskId);
   const recorsetForms = await formModel.getFormByTask(req.params.taskId);
   const forms = await Promise.all(recorsetForms.rows.map(async frm => {
       const form = {};
@@ -290,18 +300,16 @@ exports.getFormsByTaskPerUser = wrapAsyncFn(async (req, res) => {
       form.description = frm.description;
       form.state= frm.state;
       form.userName= frm.user_creation;
-      form.elements= orderSectionsAndQuestions(sections, questions);
+      form.sections= orderSectionsAndQuestionsForWeb(sections, questions);
       return form;
   }));
 
-
-
-  // if (forms.rowCount === 0) {
-  //   throw new AppError(
-  //     `Not found forms for Task: ${req.params.taskId}`,
-  //     200
-  //   );
-  // }
+  if (forms.rowCount === 0) {
+    throw new AppError(
+      `Not found forms for Task: ${req.params.taskId}`,
+      200
+    );
+  }
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
