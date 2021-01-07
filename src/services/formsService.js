@@ -171,7 +171,6 @@ const orderSectionsAndQuestions = (sec, que) => {
 };
 
 const orderSectionsAndQuestionsForWeb = (sec, que) => {
-  // let res = [];
   sec.forEach((section) => {
     section.questions = que.filter((el) => el.idSection === section.id);
   });
@@ -285,7 +284,6 @@ exports.getFormsByTaskPerUser = wrapAsyncFn(async (req, res) => {
   if (validate.error) {
     throw validate.error;
   }
-  // const forms = await formModel.getFormByTask(req.params.taskId);
   const recorsetForms = await formModel.getFormByTask(req.params.taskId);
   const forms = await Promise.all(recorsetForms.rows.map(async frm => {
       const form = {};

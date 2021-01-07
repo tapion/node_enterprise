@@ -40,7 +40,7 @@ exports.getWorkOrderByOperator = async (operatorId) => {
 };
 exports.getTasksByUser = async (operatorId) => {
   return db.query(
-    `select c.id as "idTask",
+    `select two.id as "idTask",
       c."name" as "nameTask",
       wo.id as "idOrder",
       wo."name" as "nameOrder",
