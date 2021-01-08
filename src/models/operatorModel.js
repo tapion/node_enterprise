@@ -43,7 +43,6 @@ exports.getTasksByUser = async (operatorId) => {
     `select two.id as "idTask",
       c."name" as "nameTask",
       wo.id as "idOrder",
-      wo."name" as "nameOrder",
       wo.description,
       c2."name" as "state"
     from "taskWorkOrder" two 
