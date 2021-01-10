@@ -18,54 +18,61 @@ exports.getAllRoles = async () => {
       order by r."name" `
       );
 };
-// exports.updateTypeOrderAndTask = async (req, idTypeOrder, user) => {
-//   return await Promise.all(
-//     req.tasks.map(async (form) => {
-//       const result = await db.query(
-//         `UPDATE "orderTypeTask" set state = $3, 
-//         "modificationUser" = $4, 
-//         "modificationDate" = now() 
-//         WHERE "orderTypeId" = $1 AND "taskId" = $2 AND deleted = false`,
-//         [idTypeOrder, form.idTask, form.status, user.userName]
-//       );
-//       if (result.rowCount === 0) {
-//         await db.query(
-//           `INSERT INTO "orderTypeTask" ("orderTypeId", "taskId", "creationUser", state) VALUES ($1,$2, $3, $4) RETURNING id;`,
-//           [idTypeOrder, form.idTask, user.userName, form.status]
-//         );
-//       }
-//     })
-//   );
-// };
-// exports.deleteTypeOrderAndTask = async (req, user) => {
-//   return await db.query(
-//     `UPDATE "orderTypeTask" set deleted = true, "modificationUser"=$3, "modificationDate"=now()
-//     WHERE "orderTypeId" = $1 AND "taskId" = $2 AND deleted = false`,
-//     [req.idTypeOrder, req.idTask, user.userName]
-//   );
-// };
-// exports.getAllTypeOrderAndTask = async (idTypeOrder) => {
-//   try {
-//     const tasks = await db.query(
-//       `SELECT id as "taskOrderTypeId"
-//         ,"taskId" as "idTask"
-//         ,state as status
-//         FROM "orderTypeTask"
-//         WHERE "orderTypeId" = $1 AND deleted = false`,
-//       [idTypeOrder]
-//     );
-//     const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
-//     //CONTROLAR CUNADO HAY ERROR
-//     const response = await caller(`/v1/options/${process.env.CTG_TASKID}`);
-//     tasks.rows.forEach((task) => {
-//       const catNameTask = response.data.filter(
-//         (cTaks) => cTaks.id === task.idTask
-//       );
-//       task.nameTask = catNameTask[0].name;
-//     });
-//     return tasks.rows;
-//   } catch (e) {
-//     console.log('error***', e);
-//     throw e;
-//   }
-// };
+exports.getRolById = async (rolId) => {
+  return db.query(
+        `select
+        r.id as "roleId",
+        r."name" as "roleName",
+        r.description as "roleDescription",
+        r.status as "active",
+        u."userName" as "creationUser",
+        r."creationDate" ,
+        u2."userName" as "modificationUser" ,
+        r."modificationDate" 
+      from roles r 
+      inner join users u on u."userName" = r."creationUser"
+      left join users u2 on u2."userName" = r."modificationUser" 
+      where r.deleted = false and r.id = $1
+      order by r."name" `, [rolId]
+      );
+};
+exports.saveRol = async (body,user) => {
+  return db.query(
+        `INSERT INTO public.roles
+        ("name", description, status, "creationUser")
+        VALUES($1, $2, $3, $4) RETURNING id;`,
+        [body.roleName,body.roleDescription,body.active,user.userName]
+      );
+};
+
+exports.updateRolById = async (id,body,user) => {
+  return db.query(
+        `UPDATE roles
+        SET "name"=$2, description=$3, 
+          status=$4, 
+          "modificationUser"=$5, 
+          "modificationDate"=now()
+        WHERE id=$1 and deleted=false`,
+        [
+          id,
+          body.roleName,
+          body.roleDescription,
+          body.active,
+          user.userName
+        ]
+      );
+};
+
+exports.deleteRolById = async (id,user) => {
+  return db.query(
+        `UPDATE roles
+        SET deleted = true,
+          "modificationUser"=$2, 
+          "modificationDate"=now()
+        WHERE id=$1 and deleted=false`,
+        [
+          id,
+          user.userName
+        ]
+      );
+};
