@@ -128,7 +128,8 @@ exports.updateRolById = wrapAsyncFn(async (req,res) => {
   if (recorsetSaveRole.rowCount === 0) {
     message = 'lbl_resp_404';
     recorsetSaveRole.rows[0] = {};
-  }  res.status(200).json({
+  }  
+  res.status(200).json({
     status: 200,
     message,
     transaccionId: recorsetSaveRole.rowCount,
