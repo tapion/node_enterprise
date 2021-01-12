@@ -202,7 +202,7 @@ const saveForm = async (
 
 exports.CreateForm = async (body, sec, quest, user) => {
   quest = await createCatalogs(quest, user);
-  return await db.transactions(async (client) => {
+  return db.transactions(async (client) => {
     await saveForm(client, quest, body, sec, user);
     return { body, sec, quest };
   });

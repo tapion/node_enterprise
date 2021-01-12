@@ -65,16 +65,6 @@ exports.getAllRol = wrapAsyncFn(async (req,res,next) => {
 });
 
 exports.insertRol = wrapAsyncFn(async (req,res) => {
-  const schema = Joi.object({
-    roleId: Joi.number().integer().allow(null).empty(''),
-    roleName: Joi.string().min(5).required(),
-    roleDescription: Joi.string().min(5).required(),
-    active: Joi.boolean().required()
-  });
-  const validate = schema.validate(req.body);
-  if (validate.error) {
-    throw validate.error;
-  }
   const recorsetSaveRole = await rolModel.saveRol(req.body, req.userLoged);
   res.status(201).json({
     status: 201,
@@ -117,18 +107,30 @@ exports.validateRolId = wrapAsyncFn(async (req,res,next) => {
   next();
 });
 
-exports.updateRolById = wrapAsyncFn(async (req,res) => {  
-  let message = 'lbl_resp_succes';
+exports.validateRolBody = wrapAsyncFn(async (req,res,next) => {
   const schema = Joi.object({
     roleId: Joi.number().integer().allow(null).empty(''),
     roleName: Joi.string().min(5).required(),
     roleDescription: Joi.string().min(5).required(),
-    active: Joi.boolean().required()
+    active: Joi.boolean().required(),
+    menuOptions: Joi.array().items(
+      Joi.object({
+        id: Joi.number().integer().required(),
+        read: Joi.boolean().required(),
+        write: Joi.boolean().required(),
+        delete: Joi.boolean().required(),
+      })
+    ),
   });
   const validate = schema.validate(req.body);
   if (validate.error) {
-    throw validate.error;
+    next(validate.error);
   }
+  next();
+});
+
+exports.updateRolById = wrapAsyncFn(async (req,res) => {  
+  let message = 'lbl_resp_succes';
   const recorsetSaveRole = await rolModel.updateRolById(req.params.roleId,req.body, req.userLoged);
   if (recorsetSaveRole.rowCount === 0) {
     message = 'lbl_resp_404';
