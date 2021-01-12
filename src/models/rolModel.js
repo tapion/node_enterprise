@@ -76,3 +76,18 @@ exports.deleteRolById = async (id,user) => {
         ]
       );
 };
+exports.menuOptionsByRolId = async (rolId) => {
+  return db.query(
+        `select mobr."menuOptionId" as id
+          ,mobr."read" 
+          ,mobr."write" 
+          ,mobr."delete" 
+        from "menuOptionsByRole" mobr 
+        inner join "menuOptions" mo on mo.id = mobr."menuOptionId" and mo.status = true and mo.deleted = false
+        where mobr.rolid = $1
+        order by mo."order", mo."name"`,
+        [
+          rolId
+        ]
+      );
+};

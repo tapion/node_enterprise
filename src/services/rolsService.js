@@ -92,12 +92,17 @@ exports.getRolById = wrapAsyncFn(async (req,res) => {
     message = 'lbl_resp_404';
     recorsetSaveRole.rows[0] = {};
   }
+  
+  const response = await Promise.all(recorsetSaveRole.rows.map(async rol => {
+    const menuOptions = await rolModel.menuOptionsByRolId(rol.roleId);
+    return {...rol,menuOptions: menuOptions.rows}
+  }));
   res.status(200).json({
     status: 200,
     message,
     transaccionId: recorsetSaveRole.rowCount,
     serverTime: Date.now(),
-    data: recorsetSaveRole.rows[0],
+    data: response,
   });
 });
 
