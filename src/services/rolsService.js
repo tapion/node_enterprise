@@ -121,6 +121,10 @@ exports.validateRolBody = wrapAsyncFn(async (req,res,next) => {
         delete: Joi.boolean().required(),
       })
     ),
+    creationUser: Joi.string().allow(null).empty(''),
+    creationDate: Joi.string().allow(null).empty(''),
+    modificationUser: Joi.string().allow(null).empty(''),
+    modificationDate: Joi.string().allow(null).empty(''),
   });
   const validate = schema.validate(req.body);
   if (validate.error) {
