@@ -30,7 +30,7 @@ app.use(compression());
 app.use(express.json());
 app.use('/v1/auth/', authRoute);
 app.use(authervice.getVerifyMiddleware);
-app.use('/v1/users_login/', usersRoute);
+app.use('/v1/users/', usersRoute);
 app.use('/v1/menu/', menuRoute);
 app.use('/v1/operators/', operatorRoute);
 app.use('/v1/roles/', rolsRoute);

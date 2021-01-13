@@ -94,3 +94,16 @@ exports.signUp = wrapAsyncFn(async (req, res) => {
     data: { ...req.body },
   });
 });
+
+
+exports.getAllUsers = wrapAsyncFn(async (req, res) => {
+  const users = await userModel.getAllUsers();
+  const rowAffected = users.length;
+  res.status(200).json({
+    status: 200,
+    rowAffected,
+    message: 'lbl_resp_succes',
+    serverTime: Date.now(),
+    data: users,
+  });
+});
