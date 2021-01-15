@@ -9,7 +9,7 @@ exports.getAllMenuOptions = async (secId = null,roles) => {
           ,mo.icon
           ,mo."path" 
         from "menuOptions" mo 
-        inner join "menuOptionsByRole" mobr on mobr."menuOptionId" = mo.id and mobr.rolid in (${roles})
+        --inner join "menuOptionsByRole" mobr on mobr."menuOptionId" = mo.id and mobr.rolid in (${roles})
         where mo.parent is null and mo.status = true and mo.deleted = false
         order by mo."order"`
         );
@@ -19,7 +19,7 @@ exports.getAllMenuOptions = async (secId = null,roles) => {
           ,mo.icon
           ,mo."path" 
         from "menuOptions" mo 
-        inner join "menuOptionsByRole" mobr on mobr."menuOptionId" = mo.id and mobr.rolid in (${roles})
+        --inner join "menuOptionsByRole" mobr on mobr."menuOptionId" = mo.id and mobr.rolid in (${roles})
         where mo.parent = $1 and mo.status = true and mo.deleted = false
         order by mo."name"
         `,[secId]);
