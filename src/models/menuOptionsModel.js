@@ -9,8 +9,12 @@ exports.getAllMenuOptions = async (secId = null,roles) => {
           ,mo.icon
           ,mo."path" 
         from "menuOptions" mo 
-        --inner join "menuOptionsByRole" mobr on mobr."menuOptionId" = mo.id and mobr.rolid in (${roles})
         where mo.parent is null and mo.status = true and mo.deleted = false
+          and  mo.id in (
+            select mobr."menuOptionId" 
+            from "menuOptionsByRole" mobr 
+            where mobr."menuOptionId" = mo.id and mobr.rolid in (${roles})
+          )
         order by mo."order"`
         );
   }else{
@@ -19,9 +23,13 @@ exports.getAllMenuOptions = async (secId = null,roles) => {
           ,mo.icon
           ,mo."path" 
         from "menuOptions" mo 
-        --inner join "menuOptionsByRole" mobr on mobr."menuOptionId" = mo.id and mobr.rolid in (${roles})
         where mo.parent = $1 and mo.status = true and mo.deleted = false
-        order by mo."name"
+          and  mo.id in (
+            select mobr."menuOptionId" 
+            from "menuOptionsByRole" mobr 
+            where mobr."menuOptionId" = mo.id and mobr.rolid in (${roles})
+          )
+      order by mo."name"
         `,[secId]);
   }
   if(sections.rowCount === 0) return undefined;
