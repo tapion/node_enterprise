@@ -30,3 +30,29 @@ exports.getAllMenuOptions = async (secId = null,roles) => {
     return {...sec,menuSections: children}
   }))
 };
+exports.getAllOptionsAsignedWithoutPath = async (secId = null) => {
+  let sections;
+  if(secId === null){
+    sections = await db.query(
+          `select mo.id 
+          ,mo."name" 
+          ,mo.icon
+        from "menuOptions" mo 
+        where mo.parent is null and mo.status = true and mo.deleted = false
+        order by mo."order"`
+        );
+  }else{
+    sections = await db.query(`select mo.id 
+          ,mo."name" 
+          ,mo.icon
+        from "menuOptions" mo 
+        where mo.parent = $1 and mo.status = true and mo.deleted = false
+        order by mo."name"
+        `,[secId]);
+  }
+  if(sections.rowCount === 0) return undefined;
+  return Promise.all(sections.rows.map(async sec => {
+    const children = await exports.getAllOptionsAsignedWithoutPath(sec.id);
+    return {...sec,menuSections: children}
+  }))
+};
