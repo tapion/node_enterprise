@@ -70,6 +70,7 @@ exports.getUser = async (email) => {
         , password
         , "changedPasswordAt" 
         , o2.id as "operatorId"
+        , users."rolesId"
       FROM users 
       inner join operators o2 on o2."userName" = users."userName" and o2.active = true
       where email = $1 
@@ -147,10 +148,10 @@ const constructResponse = async (user) => {
     email: user.email,
     phone: user.phone,
     active: user.state,
-    creationUser: user.creationDate,
-    creationDate: user.creationUser,
-    modificationUser: user.modificationDate,
-    modificationDate: user.modificationUser,
+    creationUser: user.creationUser,
+    creationDate: user.creationDate,
+    modificationUser: user.modificationUser,
+    modificationDate: user.modificationDate,
     roles: roles.rows,      
   }
 }

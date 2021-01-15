@@ -16,6 +16,7 @@ const createToken = (user, expiredTime) => {
       email: user.email,
       name: user.name,
       userName: user.userName,
+      roles: user.rolesId,
     },
     process.env.JWT_SECRET,
     {

@@ -3,18 +3,12 @@ const menuModel = require('../models/menuOptionsModel');
 const wrapAsyncFn = require('../utils/wrapAsyncFunction');
 const AppError = require('../utils/appError');
 
-exports.getAllOptionsAsigned = wrapAsyncFn(async (req,res) => {
-  const menuOptions = await menuModel.getAllMenuOptions();
-  // if (menuOptions.rowCount === 0) {
-  //   throw new AppError(
-  //     `Not found Roles`,
-  //     200
-  //   );
-  // }
+exports.getAllOptionsAsigned = wrapAsyncFn(async (req,res) => {  
+  const menuOptions = await menuModel.getAllMenuOptions(null,req.userLoged.roles.join(','));
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
-    transaccionId: menuOptions.length,
+    rowAffected: menuOptions.length,
     serverTime: Date.now(),
     data: menuOptions,
   });
