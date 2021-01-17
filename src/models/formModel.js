@@ -353,7 +353,7 @@ exports.getQuestionsBySection = async (sectionId) => {
   );
 };
 exports.associateTypeTask = async (req, user) => {
-  return await Promise.all(
+  return  Promise.all(
     req.forms.map(async (form) => {
       await db.query(
         `INSERT INTO "formsTypeTasks" ("taskId", "formId", "creationUser", required) VALUES ($1,$2, $3, $4) RETURNING id;`,
@@ -363,7 +363,7 @@ exports.associateTypeTask = async (req, user) => {
   );
 };
 exports.updateAssociateTypeTask = async (taskId, req, user) => {
-  return await db.query(
+  return  db.query(
     `UPDATE "formsTypeTasks" 
       set "modificationDate" = now()
       , "modificationUser" = $3
@@ -374,7 +374,7 @@ exports.updateAssociateTypeTask = async (taskId, req, user) => {
 };
 
 exports.deleteAssociateTypeTask = async (params) => {
-  return await db.query(
+  return  db.query(
     `DELETE FROM "formsTypeTasks" 
     WHERE "taskId" = $2 AND "formId" = $1`,
     [params.idForm, params.idTask]
@@ -382,7 +382,7 @@ exports.deleteAssociateTypeTask = async (params) => {
 };
 
 exports.deleteForm = async (params, user) => {
-  return await db.query(
+  return  db.query(
     `UPDATE forms set deleted = true, modification = now(), user_modification = $2
     WHERE id = $1`,
     [params.formId, user.userName]
@@ -427,21 +427,26 @@ exports.getFormByTypeOrder = async (typeOrderId) => {
   return formsRecordSet.rows;
 };
 
-exports.getFormByTask = async (taskId) => {
-  // console.log(process.env.CTG_INITIATED_TASK_STATUS);
+exports.getFormByTask = async (taskId,user) => {
+  // TODO: Eliminar linea comentareada
+  // inner join operators o2 on o2.id = two."operatorId" and o2.active = true and o2."userName" = $3
   return db.query(
     `select ftt."formId" 
         ,f2."name" 
         ,f2.description
         ,c2."name" as state
         ,f2.user_creation        
-      from "taskWorkOrder" two 
+      from "taskWorkOrder" two       
       inner join catalogue c2 on c2.id = two.status
       inner join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" and ott.deleted = false and ott.state = true
       inner join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" and ftt.deleted = false and ftt.state = true
       inner join forms f2 on f2.id = ftt."formId" and f2.deleted = false and f2.state = true
       where two.id = $1 and two.status = $2
       order by f2."name"`,
-    [taskId,process.env.CTG_INITIATED_TASK_STATUS]
+    [
+      taskId,
+      process.env.CTG_INITIATED_TASK_STATUS /*,
+      user.userName */
+    ]
   );
 };

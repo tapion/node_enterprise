@@ -284,7 +284,7 @@ exports.getFormsByTaskPerUser = wrapAsyncFn(async (req, res) => {
   if (validate.error) {
     throw validate.error;
   }
-  const recorsetForms = await formModel.getFormByTask(req.params.taskId);
+  const recorsetForms = await formModel.getFormByTask(req.params.taskId,req.userLoged);
   const forms = await Promise.all(recorsetForms.rows.map(async frm => {
       const form = {};
       const sectionsResponse = await formModel.getSectionsByForm(frm.formId);
