@@ -65,7 +65,8 @@ exports.validateUserBody = (req,res,next) => {
     modificationDate: Joi.string().allow(null).empty(''),
     roles: Joi.array().items(
       Joi.object({
-        id: Joi.number().integer().required()
+        id: Joi.number().integer().required(),
+        name: Joi.string().allow(null).empty(''),
       })
     ),
   });

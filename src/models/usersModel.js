@@ -72,7 +72,7 @@ exports.getUser = async (email) => {
         , o2.id as "operatorId"
         , users."rolesId"
       FROM users 
-      inner join operators o2 on o2."userName" = users."userName" and o2.active = true
+      left join operators o2 on o2."userName" = users."userName" and o2.active = true
       where email = $1 
       and state = true and deleted = false`,
     [email]
@@ -177,8 +177,8 @@ exports.getAllUsers = async () => {
       ,u.state 
       ,u."creationDate"
       ,u."creationUser" 
-      ,u."modificationDate" 
-      ,u."modificationUser" 
+      ,case when u."modificationDate" is null then  u."creationDate" end as "modificationDate"
+      ,case when u."modificationUser" is null then  u."creationUser" end as "modificationUser"
     from users u
     inner join catalogue c on c.id = u."typDocument_catalogue" and (c.deleted = false or c.deleted is null)
     inner join catalogue c2 on c2.id = u."genreId_catalogue" and (c2.deleted = false or c2.deleted is null)
@@ -213,8 +213,8 @@ exports.getUserById = async (userId) => {
       ,u.state 
       ,u."creationDate"
       ,u."creationUser" 
-      ,u."modificationDate" 
-      ,u."modificationUser" 
+      ,case when u."modificationDate" is null then  u."creationDate" end as "modificationDate"
+      ,case when u."modificationUser" is null then  u."creationUser" end as "modificationUser"
     from users u
     inner join catalogue c on c.id = u."typDocument_catalogue" and (c.deleted = false or c.deleted is null)
     inner join catalogue c2 on c2.id = u."genreId_catalogue" and (c2.deleted = false or c2.deleted is null)
