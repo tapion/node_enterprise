@@ -177,8 +177,8 @@ exports.getAllUsers = async () => {
       ,u.state 
       ,u."creationDate"
       ,u."creationUser" 
-      ,case when u."modificationDate" is null then  u."creationDate" end as "modificationDate"
-      ,case when u."modificationUser" is null then  u."creationUser" end as "modificationUser"
+      ,case when u."modificationDate" is null then  u."creationDate" else u."modificationDate" end as "modificationDate"
+      ,case when u."modificationUser" is null then  u."creationUser" else u."modificationUser" end as "modificationUser"
     from users u
     inner join catalogue c on c.id = u."typDocument_catalogue" and (c.deleted = false or c.deleted is null)
     inner join catalogue c2 on c2.id = u."genreId_catalogue" and (c2.deleted = false or c2.deleted is null)
@@ -213,8 +213,8 @@ exports.getUserById = async (userId) => {
       ,u.state 
       ,u."creationDate"
       ,u."creationUser" 
-      ,case when u."modificationDate" is null then  u."creationDate" end as "modificationDate"
-      ,case when u."modificationUser" is null then  u."creationUser" end as "modificationUser"
+      ,case when u."modificationDate" is null then  u."creationDate" else u."modificationDate" end as "modificationDate"
+      ,case when u."modificationUser" is null then  u."creationUser" else u."modificationUser" end as "modificationUser"
     from users u
     inner join catalogue c on c.id = u."typDocument_catalogue" and (c.deleted = false or c.deleted is null)
     inner join catalogue c2 on c2.id = u."genreId_catalogue" and (c2.deleted = false or c2.deleted is null)
