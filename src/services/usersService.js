@@ -38,22 +38,22 @@ exports.validateUserBody = (req,res,next) => {
     id: Joi.number().integer().allow(null).empty(''),
     identificationType: Joi.object({
       id: Joi.number().integer().required(),
-      name: Joi.string().required(),
+      name: Joi.string().allow(null).empty(''),
     }).required(),
     identificationNumber: Joi.string().required(),
     genre: Joi.object({
       id: Joi.number().integer().required(),
-      name: Joi.string().required(),
+      name: Joi.string().allow(null).empty(''),
     }).required(),
     country: Joi.object({
       iso: Joi.string().required(),
-      name: Joi.string().required(),
+      name: Joi.string().allow(null).empty(''),
     }).required(),
     firstNames: Joi.string().required(),
     lastNames: Joi.string().required(),
     picture: Joi.string().required(),
     login: Joi.string().required(),
-    password: Joi.string().required(),
+    password: Joi.string(),
     email: Joi.string()
       .email({ tlds: { allow: false } })
       .required(),
@@ -65,8 +65,7 @@ exports.validateUserBody = (req,res,next) => {
     modificationDate: Joi.string().allow(null).empty(''),
     roles: Joi.array().items(
       Joi.object({
-        id: Joi.number().integer().required(),
-        name: Joi.string().required(),
+        id: Joi.number().integer().required()
       })
     ),
   });

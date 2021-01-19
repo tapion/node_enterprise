@@ -64,21 +64,6 @@ exports.saveRol = async (body,user) => {
           [body.roleName,body.roleDescription,body.active,user.userName]
     );
     await insertMenuOptions(client,rol.rows[0].id,body,user.userName);
-    // await Promise.all(body.menuOptions.map(async opc => {
-    //   return client.query(
-    //     `INSERT INTO "menuOptionsByRole"
-    //     ("menuOptionId", rolid, "read", "write", "delete", "creationUser")
-    //     VALUES($1, $2, $3, $4, $5, $6)`,
-    //     [
-    //       opc.id,
-    //       rol.rows[0].id,
-    //       opc.read,
-    //       opc.write,
-    //       opc.delete,
-    //       user.userName
-    //     ]
-    //   );
-    // }));
     return rol; 
   });
 };
@@ -102,14 +87,10 @@ exports.updateRolById = async (id,body,user) => {
     );
 
     await client.query(
-      `UPDATE "menuOptionsByRole"
-      SET "deleted"=TRUE, 
-        "modificationUser"=$2, 
-        "modificationDate"=now()
-      WHERE rolId=$1 and deleted=false`,
+      `DELETE FROM "menuOptionsByRole"
+      WHERE rolId=$1`,
       [
         id,
-        user.userName        
       ]
     );
 
