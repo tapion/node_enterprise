@@ -435,17 +435,18 @@ exports.getFormByTask = async (taskId,user) => {
         ,f2."name" 
         ,f2.description
         ,c2."name" as state
+        ,two.status as "idStatus"
         ,f2.user_creation        
       from "taskWorkOrder" two       
       inner join catalogue c2 on c2.id = two.status
       inner join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" and ott.deleted = false and ott.state = true
       inner join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" and ftt.deleted = false and ftt.state = true
       inner join forms f2 on f2.id = ftt."formId" and f2.deleted = false and f2.state = true
-      where two.id = $1 and two.status = $2
+      where two.id = $1
       order by f2."name"`,
     [
       taskId,
-      process.env.CTG_INITIATED_TASK_STATUS /*,
+      /*,
       user.userName */
     ]
   );
