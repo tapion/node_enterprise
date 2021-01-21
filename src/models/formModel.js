@@ -434,8 +434,7 @@ exports.getFormByTask = async (taskId,user) => {
     `select ftt."formId" 
         ,f2."name" 
         ,f2.description
-        ,c2."name" as state
-        ,two.status as "idStatus"
+        ,c2."name" as state        
         ,f2.user_creation        
       from "taskWorkOrder" two       
       inner join catalogue c2 on c2.id = two.status

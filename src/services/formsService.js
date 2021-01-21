@@ -297,7 +297,6 @@ exports.getFormsByTaskPerUser = wrapAsyncFn(async (req, res) => {
       form.name = frm.name;
       form.description = frm.description;
       form.state= frm.state;
-      form.idStatus = frm.idStatus;
       form.userName= frm.user_creation;
       form.sections= orderSectionsAndQuestionsForWeb(sections, questions);
       return form;

@@ -39,12 +39,14 @@ exports.getWorkOrderByOperator = async (operatorId) => {
   );
 };
 exports.getTasksByUser = async (operatorId) => {
+  //TODO: ASOCIAR USUARIOS
   return db.query(
     `select two.id as "idTask",
       c."name" as "nameTask",
       wo.id as "idOrder",
       wo.description,
       c2."name" as "state"
+      ,two.status as "idStatus"
     from "taskWorkOrder" two 
     inner join "workOrder" wo on wo.id = two."workOrderId" 
     INNER join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" 
