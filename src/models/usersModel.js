@@ -66,15 +66,15 @@ exports.updateUser = async (userId,body, user) => {
 
 exports.getUser = async (email) => {
   return db.query(
-    `SELECT email, users."userName", users."firstName" || ' ' || users."lastName" as name
-        , password
-        , "changedPasswordAt" 
+    `SELECT u.email, u."userName", u."firstName" || ' ' || u."lastName" as name
+        , u.password
+        , u."changedPasswordAt" 
         , o2.id as "operatorId"
-        , users."rolesId"
-      FROM users 
-      left join operators o2 on o2."userName" = users."userName" and o2.active = true
-      where email = $1 
-      and state = true and deleted = false`,
+        , u."rolesId"
+      FROM users u
+      left join operators o2 on o2."userName" = u."userName" and o2.active = true and o2.deleted = false
+      where u.email = $1 
+      and u.state = true and u.deleted = false`,
     [email]
   );
 };
