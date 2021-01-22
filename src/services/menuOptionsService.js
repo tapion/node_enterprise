@@ -5,6 +5,7 @@ const AppError = require('../utils/appError');
 
 exports.getAllOptionsAsigned = wrapAsyncFn(async (req,res) => {  
   const menuOptions = await menuModel.getAllMenuOptions(null,req.userLoged.roles.join(','));
+  //TODO: Validar cuando no hay opciones
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
