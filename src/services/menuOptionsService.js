@@ -5,7 +5,7 @@ const validateHasOptions = (opc) => {
     let hasChildren = false;
     opc.forEach(opc1 => {
       if(opc1.menuSections === undefined){
-        hasChildren = !hasChildren && (opc1.path) && opc1.path.length > 1;
+        hasChildren = (!hasChildren && (opc1.path) && opc1.path.length > 1) ? true : hasChildren;
       }else{
         hasChildren = !hasChildren && validateHasOptions(opc1.menuSections) ? true : hasChildren;
       }
