@@ -352,6 +352,8 @@ exports.getQuestionsBySection = async (sectionId) => {
     })
   );
 };
+
+
 exports.associateTypeTask = async (req, user) => {
   return  Promise.all(
     req.forms.map(async (form) => {
