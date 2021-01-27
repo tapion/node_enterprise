@@ -59,7 +59,7 @@ exports.getVerifyMiddleware = wrapAsyncFn(async (req, res, next) => {
     }
     const user = await userModel.getUser(tokenData.email);
     if (user.rows <= 0) {
-      return next(new AppError('User does not exist', 401));
+      return next(new AppError('User does not exist', 404));
     }
     if (
       user.rows[0].changedPasswordAt &&

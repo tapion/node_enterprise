@@ -89,7 +89,7 @@ exports.login = wrapAsyncFn(async (req, res) => {
     user.rows.length <= 0 ||
     !await validatePassword(req.body.password, user.rows[0].password)
   )
-    throw new AppError('User or email invalid', 403);
+    throw new AppError('User or email invalid', 404);
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
