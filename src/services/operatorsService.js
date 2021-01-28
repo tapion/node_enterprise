@@ -28,7 +28,7 @@ const findAnswer = (questionId,response) => {
       case 'Pick':
       case 'ComboBox':
         answer = question.possibilities.filter(opc => opc.check === true);
-        answer = answer[0].value ? answer[0].value : null;
+        answer =  (answer.length > 0 && answer[0].value) ? answer[0].value : null;
         break;
       case 'Number':
       case 'DateW':
