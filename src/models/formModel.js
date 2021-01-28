@@ -11,7 +11,7 @@ exports.types = [
   { id: 1, front: 'TEXT', mobile: 'Text' },
   { id: 2, front: 'RADIOGROUP', mobile: 'Radio' },
   { id: 3, front: 'CHECKGROUP', mobile: 'CheckTable' },
-  { id: 4, front: 'TEXTAREA', mobile: 'Text' },
+  { id: 4, front: 'TEXTAREA', mobile: 'TextArea' },
   { id: 5, front: 'COMBOBOX', mobile: 'Pick' },
   { id: 6, front: 'SECTION', mobile: '' },
   { id: 7, front: 'NUMBER', mobile: 'Number' },
@@ -254,7 +254,7 @@ exports.getFormsByTaskId = async (taskId) => {
 };
 
 exports.getAllForms = async () => {
-  return await db.query(
+  return db.query(
     `SELECT id
     , "name"
     , description
@@ -264,8 +264,20 @@ exports.getAllForms = async () => {
   );
 };
 
+exports.responseTaskAsignedByweb = async (taskAsignedToOperatorId,formId) => {
+  return db.query(
+    `select data 
+    from "infoTempForm" itf 
+    where itf."taskId" = $1 and itf."formId" = $2;`,
+    [
+      taskAsignedToOperatorId,
+      formId
+    ]
+  );
+};
+
 exports.getSectionsByForm = async (formId) => {
-  return await db.query(
+  return db.query(
     'SELECT id, "name" as title, state FROM sections WHERE form_id = $1 AND deleted = FALSE ORDER BY id',
     [formId]
   );

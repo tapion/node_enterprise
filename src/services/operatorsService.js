@@ -9,8 +9,49 @@ const AppError = require('../utils/appError');
 
 dotenv.config({ path: './config.env' });
 
-const buildFormForMobile = async (form) => {
+const findAnswer = (questionId,response) => {
+  if(!response || response.rowCount <= 0) return null;
+  const data = JSON.parse(response.rows[0].data);
+  const questions = data.sections.map(sec => {
+    return sec.questions.filter(que => que.id === questionId);
+  });
+  const sectionWithQuestion = questions.filter(sec => {
+    const question = sec.filter(que => que.id === questionId);
+    return question.length > 0;
+  });
+  if(sectionWithQuestion.length > 0){
+    const question = sectionWithQuestion[0][0];
+    let answer = null;
+    switch(question.type){
+      case 'Radio':
+      case 'CheckTable':
+      case 'Pick':
+      case 'ComboBox':
+        answer = question.possibilities.filter(opc => opc.check === true);
+        answer = answer[0].value ? answer[0].value : null;
+        break;
+      case 'Number':
+      case 'DateW':
+      case 'HourW':
+      case 'Text':
+      case 'TextArea':
+        answer = question.value;
+        break;
+      case 'IMAGEN':
+        answer = null;
+        break;
+      default:
+        answer = `No response valid for type ${question.type}`;
+        break;
+    }
+    return answer;
+  }
+  return null;
+}
+
+const buildFormForMobile = async (form,taskForWeb) => {
   const sectionsResponse = await formModel.getSectionsByForm(form.id);
+  const responseFromWeb = (taskForWeb) ? await formModel.responseTaskAsignedByweb(taskForWeb,form.id) : null;
   return Promise.all(
     sectionsResponse.rows.map(async (sec) => {
       sec.name = sec.title;
@@ -18,12 +59,12 @@ const buildFormForMobile = async (form) => {
       sec.questions.forEach((qu) => {
         qu.type = formModel.types.find((el) => el.id === qu.type * 1).mobile;
         qu.condition.forEach((q) => {
-          console.log(q);
           q.questionId = q.source;
           q.value = q.sourceValue;
           delete q.source;
           delete q.sourceValue;
         });
+        qu.value = findAnswer(qu.id,responseFromWeb);
       });
       return sec;
     })
@@ -80,11 +121,11 @@ const assignBurnData = (ot) => {
   ot.place.client.id = 111; //QUEMADO
 };
 
-const formsByTaskId = async (typeOrder) => {
+const formsByTaskId = async (typeOrder,taskForWeb) => {
   const form = await formModel.getFormsByTaskId(typeOrder);
   return Promise.all(
     form.rows.map(async (frm) => {
-      frm.sections = await buildFormForMobile(frm);
+      frm.sections = await buildFormForMobile(frm,taskForWeb);
       return frm;
     })
   );
@@ -121,7 +162,8 @@ const asignOtValues = async (otsTmp,closeTypes) => {
       };
       assignBurnData(ot);
       ot.typesClosure = closeTypes;
-      ot.forms = await formsByTaskId(ot.orderTypeTaskId);
+      const taskIdWeb = ot.isWeb ? ot.taskId : null;
+      ot.forms = await formsByTaskId(ot.orderTypeTaskId,taskIdWeb);
       ot.typeOT = {
         id: ot.idTypeOT,
         type: ot.typeOT,
@@ -139,8 +181,7 @@ const asignOtValues = async (otsTmp,closeTypes) => {
 }
 
 
-exports.workOrders = async (req, res) => {
-  try {
+exports.workOrders = wrapAsyncFn(async (req, res) => {
     const schema = Joi.object({
       operatorId: Joi.number().integer().min(1).required(),
     });
@@ -199,13 +240,7 @@ exports.workOrders = async (req, res) => {
         OTs: ots,
       },
     });
-  } catch (e) {
-    res.status(500).json({
-      message: 'error',
-      body: e.message,
-    });
-  }
-};
+});
 
 exports.getAllOperators = (req, res) => {
   res.status(200).json({
