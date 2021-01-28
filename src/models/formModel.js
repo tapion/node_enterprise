@@ -430,8 +430,6 @@ exports.getFormByTypeOrder = async (typeOrderId) => {
 };
 
 exports.getFormByTask = async (taskId,user) => {
-  // TODO: Eliminar linea comentareada
-  // inner join operators o2 on o2.id = two."operatorId" and o2.active = true and o2."userName" = $3
   return db.query(
     `select ftt."formId" 
         ,f2."name" 
@@ -439,16 +437,16 @@ exports.getFormByTask = async (taskId,user) => {
         ,c2."name" as state        
         ,f2.user_creation        
       from "taskWorkOrder" two       
+      inner join operators o2 on o2.id = two."operatorId" and o2.active = true and o2."userName" = $2
       inner join catalogue c2 on c2.id = two.status
       inner join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" and ott.deleted = false and ott.state = true
       inner join "formsTypeTasks" ftt on ftt."taskId" = ott."taskId" and ftt.deleted = false and ftt.state = true
-      inner join forms f2 on f2.id = ftt."formId" and f2.deleted = false and f2.state = true
+      inner join forms f2 on f2.id = ftt."formId" and f2.deleted = false and f2.state = true      
       where two.id = $1
       order by f2."name"`,
     [
       taskId,
-      /*,
-      user.userName */
+      user.userName,
     ]
   );
 };

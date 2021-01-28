@@ -27,6 +27,7 @@ exports.getWorkOrderByOperator = async (operatorId) => {
           ,two."initialDate"
           ,two."endDate"
           ,two.status
+          ,case when two."editionOnWeb" is null then  false else two."editionOnWeb" end AS "isWeb"
       FROM "taskWorkOrder" two 
       inner JOIN "workOrder" wo ON two."workOrderId" = wo.id
       inner join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" 
@@ -38,8 +39,7 @@ exports.getWorkOrderByOperator = async (operatorId) => {
     [operatorId]
   );
 };
-exports.getTasksByUser = async (operatorId) => {
-  //TODO: ASOCIAR USUARIOS
+exports.getTasksByUser = async (userName) => {
   return db.query(
     `select two.id as "idTask",
       c."name" as "nameTask",
@@ -48,12 +48,14 @@ exports.getTasksByUser = async (operatorId) => {
       c2."name" as "state"
       ,two.status as "idStatus"
     from "taskWorkOrder" two 
+    inner join operators o2 on o2.id  = two."operatorId" and o2."userName" = $1
     inner join "workOrder" wo on wo.id = two."workOrderId" 
     INNER join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" 
     INNER join catalogue c on c.id = ott."taskId" 
     inner join catalogue c2 on c2.id = two.status
-    where two."editionOnWeb" = true
-    order by c."name", wo."name",two.status`
+    where two."editionOnWeb" = true 
+    order by c."name", wo."name",two.status`,
+    [userName]
   );
 };
 

@@ -106,6 +106,38 @@ exports.getTasksByUser = wrapAsyncFn(async (req, res) => {
   });
 });
 
+const asignOtValues = async (otsTmp,closeTypes) => {
+  return Promise.all(
+    otsTmp.rows.map(async (ot) => {
+      ot.staus = {
+        id: ot.stateId,
+        description: ot.stateDescription,
+      };
+      ot.place = {
+        place: ot.placesId,
+        client: {
+          name: ot.clientId,
+        },
+      };
+      assignBurnData(ot);
+      ot.typesClosure = closeTypes;
+      ot.forms = await formsByTaskId(ot.orderTypeTaskId);
+      ot.typeOT = {
+        id: ot.idTypeOT,
+        type: ot.typeOT,
+        formsRequired: ot.forms
+          .filter((frm) => frm.required)
+          .map((frm) => {
+            return frm.id;
+          }),
+      };
+      delete ot.idTypeOT;
+      delete ot.orderTypeTaskId;
+      return ot;
+    })
+  );  
+}
+
 
 exports.workOrders = async (req, res) => {
   try {
@@ -130,35 +162,7 @@ exports.workOrders = async (req, res) => {
         division: 'MANTENIMIENTO', //QUEMADO
       };
     });
-    const ots = await Promise.all(
-      otsTmp.rows.map(async (ot) => {
-        ot.staus = {
-          id: ot.stateId,
-          description: ot.stateDescription,
-        };
-        ot.place = {
-          place: ot.placesId,
-          client: {
-            name: ot.clientId,
-          },
-        };
-        assignBurnData(ot);
-        ot.typesClosure = closeTypes;
-        ot.forms = await formsByTaskId(ot.orderTypeTaskId);
-        ot.typeOT = {
-          id: ot.idTypeOT,
-          type: ot.typeOT,
-          formsRequired: ot.forms
-            .filter((frm) => frm.required)
-            .map((frm) => {
-              return frm.id;
-            }),
-        };
-        delete ot.idTypeOT;
-        delete ot.orderTypeTaskId;
-        return ot;
-      })
-    );
+    const ots = await asignOtValues(otsTmp,closeTypes);
     res.status(200).json({
       status: 200,
       message: 'lbl_resp_succes',
