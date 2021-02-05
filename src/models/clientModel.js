@@ -233,7 +233,7 @@ exports.getCustomerById = async (customerId) => {
   return customer;
 };
 exports.deleteCustomer = async (costumerId, user) => {
-  return await db.query(
+  return db.query(
     `UPDATE customers set deleted = true , "modificationDate"=now(), "modificationUser"=$2
     where id = $1`,
     [costumerId, user.userName]
@@ -259,7 +259,7 @@ exports.updateClient = async (body, user) => {
 };
 
 exports.getOfficessByCustomer = async(customerId) => {
-  return await db.query(`SELECT
+  return db.query(`SELECT
   c.id ,
   c."document" as nit,
   c."name"  as "businessName",
@@ -275,4 +275,86 @@ exports.getOfficessByCustomer = async(customerId) => {
   INNER JOIN countries c3 ON c3.deleted = FALSE AND c3.state = TRUE AND c3.iso = c2."countryIso" 
   WHERE c."customerId" = $1 and c.deleted = FALSE 
   ORDER BY c."name"`, [customerId]);
+}
+exports.getCustomersByDates = async(initialDate,finalDate) => {
+  const response = await db.query(`
+      select c.id 
+        ,c."name" 
+        ,(select count(*) 
+          from "workOrder" AS wo 
+          INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
+            and (two."creationDate" between $1 and $2
+              or two."modificationDate" between $1 and $2
+            )
+          where wo."clientId"::integer = c.id 
+        ) as "totalTask"
+        ,(select count(*) 
+          from "workOrder" AS wo 
+          INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
+            and two.status = $3
+            and (two."creationDate" between $1 and $2
+              or two."modificationDate" between $1 and $2
+            )
+          where wo."clientId"::integer = c.id 
+        ) as "totalAssigned"
+        ,(select count(*) 
+        from "workOrder" AS wo 
+        INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
+          and two.status = $4
+          and (two."creationDate" between $1 and $2
+            or two."modificationDate" between $1 and $2
+          )
+        where wo."clientId"::integer = c.id 
+        ) as "totalInitilaced"
+        ,(select count(*) 
+        from "workOrder" AS wo 
+        INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
+          and two.status = $5
+          and (two."creationDate" between $1 and $2
+            or two."modificationDate" between $1 and $2
+          )
+        where wo."clientId"::integer = c.id 
+      ) as "totalInProgress"
+        ,(select count(*) 
+          from "workOrder" AS wo 
+          INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
+            and two.status = $6
+            and (two."creationDate" between $1 and $2
+              or two."modificationDate" between $1 and $2
+            )
+          where wo."clientId"::integer = c.id 
+        ) as "totalClosed"		
+      from customers c       
+      where c.status = true and c.deleted = false;`, 
+      [
+        initialDate,
+        finalDate,
+        process.env.CTG_TASKS_IN_WORK_ORDER_ASSIGNED,
+        process.env.CTG_TASKS_IN_WORK_ORDER_INITIALIZED,
+        process.env.CTG_TASKS_IN_WORK_ORDER_INPROCESS,
+        process.env.CTG_TASKS_IN_WORK_ORDER_CLOSED,
+      ]
+    );
+  return response.rows;
+}
+exports.getAssignedTasksByCustomerAndStatus = async(customerId,status,initialDate,finalDate) => {
+  const response = await db.query(`
+  select o2."firstNames" as "userFirstNames" 
+    ,o2."lastNames" as "userLastNames"
+    ,count(o2.*) as quantity
+  from "workOrder" wo
+  inner join "taskWorkOrder" as two on two."workOrderId" = wo.id 
+    and two.status = $1
+    and (two."creationDate" between $2 and $3
+    or two."modificationDate" between $2 and $3)
+  inner join operators o2 on o2.id = two."operatorId" 
+  where wo."clientId"::integer = $4
+  group by o2."firstNames" ,o2."lastNames"`, 
+  [
+    status,
+    initialDate,
+    finalDate,
+    customerId
+  ]);
+  return response.rows;
 }

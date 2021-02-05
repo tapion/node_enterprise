@@ -2,8 +2,8 @@ const Joi = require('@hapi/joi');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/usersModel');
-const wrapAsyncFn = require('../utils/wrapAsyncFunction');
 const auth = require('./auth');
+const wrapAsyncFn = require('../utils/wrapAsyncFunction');
 const AppError = require('../utils/appError');
 
 const validatePassword = async (possiblePassword, password) => {
