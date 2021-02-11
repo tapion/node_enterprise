@@ -40,7 +40,7 @@ exports.deleteTypeOrderAndTask = async (req, user) => {
     [req.idTypeOrder, req.idTask, user.userName]
   );
 };
-exports.getAllTypeOrderAndTask = async (idTypeOrder) => {
+exports.getAllTypeOrderAndTask = async (idTypeOrder,token) => {
   try {
     const tasks = await db.query(
       `SELECT id as "taskOrderTypeId"
@@ -50,7 +50,7 @@ exports.getAllTypeOrderAndTask = async (idTypeOrder) => {
         WHERE "orderTypeId" = $1 AND deleted = false`,
       [idTypeOrder]
     );
-    const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
+    const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200,{'Authorization':token});
     //CONTROLAR CUNADO HAY ERROR
     const response = await caller(`/v1/options/${process.env.CTG_TASKID}`);
     tasks.rows.forEach((task) => {

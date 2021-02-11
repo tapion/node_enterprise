@@ -107,7 +107,8 @@ exports.deleteTypeOrderAndTask = async (req, res) => {
 exports.getAllTypeOrderAndTask = async (req, res) => {
   try {
     const tasks = await orderModel.getAllTypeOrderAndTask(
-      req.params.idTypeOrder
+      req.params.idTypeOrder,
+      req.get('Authorization')
     );
     res.status(200).json({
       status: 200,

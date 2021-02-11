@@ -283,9 +283,9 @@ exports.getSectionsByForm = async (formId) => {
   );
 };
 
-const buildSourceFromCatalog = async (idTable) => {
+const buildSourceFromCatalog = async (idTable,token) => {
   try {
-    const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200);
+    const caller = bent(`${process.env.CATALOG_HOST}`, 'GET', 'json', 200,{'Authorization':token});
     if (idTable) {
       const response = await caller(`/v1/options/${idTable}`);
       return response.data.map((res) => {
@@ -304,7 +304,7 @@ const buildSourceFromCatalog = async (idTable) => {
   }
 };
 
-exports.getQuestionsByForm = async (formId) => {
+exports.getQuestionsByForm = async (formId,token) => {
   const questions = await db.query(
     `SELECT 
         qu.id,
@@ -329,7 +329,7 @@ exports.getQuestionsByForm = async (formId) => {
   );
   return await Promise.all(
     questions.rows.map(async (q) => {
-      q.source_values = await buildSourceFromCatalog(q.source_idtable);
+      q.source_values = await buildSourceFromCatalog(q.source_idtable,token);
       return q;
     })
   );

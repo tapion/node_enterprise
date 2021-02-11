@@ -192,7 +192,7 @@ exports.getForm = wrapAsyncFn(async (req, res) => {
   }
   const sectionsResponse = await formModel.getSectionsByForm(req.params.formId);
   const questionsResponse = await formModel.getQuestionsByForm(
-    req.params.formId
+    req.params.formId,req.get('Authorization')
   );
   const sections = buildElements(sectionsResponse.rows);
   const questions = buildElements(questionsResponse);
@@ -289,7 +289,7 @@ exports.getFormsByTaskPerUser = wrapAsyncFn(async (req, res) => {
       const form = {};
       const sectionsResponse = await formModel.getSectionsByForm(frm.formId);
       const questionsResponse = await formModel.getQuestionsByForm(
-      frm.formId
+      frm.formId,req.get('Authorization')
       );
       const sections = buildElements(sectionsResponse.rows);
       const questions = buildElements(questionsResponse);
