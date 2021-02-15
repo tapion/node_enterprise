@@ -52,9 +52,9 @@ const consumeCatalogs = async (catalog, caller) => {
   return response.data;
 };
 
-const createCatalogs = async (quest, user) => {
+const createCatalogs = async (quest, user,token) => {
   try {
-    const post = bent(`${process.env.CATALOG_HOST}`, 'POST', 'json', 200);
+    const post = bent(`${process.env.CATALOG_HOST}`, 'POST', 'json', 200,{'Authorization':token});
 
     return await Promise.all(
       quest.map(async (q) => {
@@ -200,8 +200,8 @@ const saveForm = async (
   return form.id;
 };
 
-exports.CreateForm = async (body, sec, quest, user) => {
-  quest = await createCatalogs(quest, user);
+exports.CreateForm = async (body, sec, quest, user,token) => {
+  quest = await createCatalogs(quest, user,token);
   return db.transactions(async (client) => {
     await saveForm(client, quest, body, sec, user);
     return { body, sec, quest };

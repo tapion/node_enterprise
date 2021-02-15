@@ -81,7 +81,8 @@ exports.create = wrapAsyncFn(async (req, res) => {
     req.body,
     sections,
     questions,
-    req.userLoged
+    req.userLoged,
+    req.get('Authorization')
   );
   prepareResponse(body.elements, sec);
   prepareResponse(body.elements, quest);
