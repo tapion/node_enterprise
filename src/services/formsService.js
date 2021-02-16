@@ -263,7 +263,7 @@ exports.getFormsByTypeOrder = wrapAsyncFn(async (req, res) => {
   if (validate.error) {
     throw validate.error;
   }
-  const forms = await formModel.getFormByTypeOrder(req.params.typeOrder);
+  const forms = await formModel.getFormByTypeOrder(req.params.typeOrder, req.get('Authorization'));
   if (forms.rowCount === 0) {
     throw new AppError(
       `Not found forms for Type Order: ${req.params.typeOrder}`,

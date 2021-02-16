@@ -335,7 +335,7 @@ exports.getQuestionsByForm = async (formId,token) => {
   );
 };
 
-exports.getQuestionsBySection = async (sectionId) => {
+exports.getQuestionsBySection = async (sectionId,token) => {
   const questions = await db.query(
     `SELECT 
           qu.id,
@@ -359,7 +359,7 @@ exports.getQuestionsBySection = async (sectionId) => {
   );
   return Promise.all(
     questions.rows.map(async (q) => {
-      q.possibilities = await buildSourceFromCatalog(q.source_idtable);
+      q.possibilities = await buildSourceFromCatalog(q.source_idtable,token);
       return q;
     })
   );
@@ -416,7 +416,7 @@ exports.getFormsByTask = async (taskId) => {
   return associate;
 };
 
-exports.getFormByTypeOrder = async (typeOrderId) => {
+exports.getFormByTypeOrder = async (typeOrderId,token) => {
   const formsRecordSet = await db.query(
     `select distinct ftt."formId" as id
         ,f2."name" 
@@ -433,7 +433,7 @@ exports.getFormByTypeOrder = async (typeOrderId) => {
       const sectionsRecordSet = await exports.getSectionsByForm(frm.id);
       frm.sections = await Promise.all(
         sectionsRecordSet.rows.map(async (sect) => {
-          return { name: sect.title, questions: await exports.getQuestionsBySection(sect.id)};
+          return { name: sect.title, questions: await exports.getQuestionsBySection(sect.id,token)};
         })
       );
     })
