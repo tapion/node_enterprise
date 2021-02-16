@@ -108,7 +108,8 @@ exports.updateForm = wrapAsyncFn(async (req, res) => {
     sections,
     questions,
     req.params.formId,
-    req.userLoged
+    req.userLoged,
+    req.get('Authorization')
   );
   prepareResponse(body.elements, sec);
   prepareResponse(body.elements, quest);

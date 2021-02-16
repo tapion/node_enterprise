@@ -208,8 +208,8 @@ exports.CreateForm = async (body, sec, quest, user,token) => {
   });
 };
 
-exports.updateForm = async (body, sec, quest, parentFormId, user) => {
-  quest = await createCatalogs(quest, user);
+exports.updateForm = async (body, sec, quest, parentFormId, user,token) => {
+  quest = await createCatalogs(quest, user,token);
   return db.transactions(async (client) => {
     await client.query(
       'UPDATE forms set deleted = true,user_modification = $2, modification=now() where id = $1',
