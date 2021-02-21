@@ -276,67 +276,7 @@ exports.getOfficessByCustomer = async(customerId) => {
   WHERE c."customerId" = $1 and c.deleted = FALSE 
   ORDER BY c."name"`, [customerId]);
 }
-exports.getCustomersByDates = async(initialDate,finalDate) => {
-  const response = await db.query(`
-      select c.id 
-        ,c."name" 
-        ,(select count(*) 
-          from "workOrder" AS wo 
-          INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
-            and (two."creationDate" between $1 and $2
-              or two."modificationDate" between $1 and $2
-            )
-          where wo."clientId"::integer = c.id 
-        ) as "totalTask"
-        ,(select count(*) 
-          from "workOrder" AS wo 
-          INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
-            and two.status = $3
-            and (two."creationDate" between $1 and $2
-              or two."modificationDate" between $1 and $2
-            )
-          where wo."clientId"::integer = c.id 
-        ) as "totalAssigned"
-        ,(select count(*) 
-        from "workOrder" AS wo 
-        INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
-          and two.status = $4
-          and (two."creationDate" between $1 and $2
-            or two."modificationDate" between $1 and $2
-          )
-        where wo."clientId"::integer = c.id 
-        ) as "totalInitilaced"
-        ,(select count(*) 
-        from "workOrder" AS wo 
-        INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
-          and two.status = $5
-          and (two."creationDate" between $1 and $2
-            or two."modificationDate" between $1 and $2
-          )
-        where wo."clientId"::integer = c.id 
-      ) as "totalInProgress"
-        ,(select count(*) 
-          from "workOrder" AS wo 
-          INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id  
-            and two.status = $6
-            and (two."creationDate" between $1 and $2
-              or two."modificationDate" between $1 and $2
-            )
-          where wo."clientId"::integer = c.id 
-        ) as "totalClosed"		
-      from customers c       
-      where c.status = true and c.deleted = false;`, 
-      [
-        initialDate,
-        finalDate,
-        process.env.CTG_TASKS_IN_WORK_ORDER_ASSIGNED,
-        process.env.CTG_TASKS_IN_WORK_ORDER_INITIALIZED,
-        process.env.CTG_TASKS_IN_WORK_ORDER_INPROCESS,
-        process.env.CTG_TASKS_IN_WORK_ORDER_CLOSED,
-      ]
-    );
-  return response.rows;
-}
+
 exports.getAssignedTasksByCustomerAndStatus = async(customerId,status,initialDate,finalDate) => {
   const response = await db.query(`
   select o2."firstNames" as "userFirstNames" 
@@ -356,5 +296,74 @@ exports.getAssignedTasksByCustomerAndStatus = async(customerId,status,initialDat
     finalDate,
     customerId
   ]);
+  return response.rows;
+}
+
+exports.summaryOfWorksOrdersByDate = async(initialDate,finalDate) => {
+  const response = await db.query(`
+  select count(*), two.status
+          from "taskWorkOrder" as two 
+            where (two."creationDate" between $1 and $2
+              or two."modificationDate" between $1 and $2) and two.deleted = false
+              group by two.status
+              order by 2;`, 
+  [
+    initialDate,
+    finalDate,
+  ]);
+  return response.rows;
+}
+
+exports.summaryWorksOrdersPerCustomerByDate = async(initialDate,finalDate) => {
+  const response = await db.query(`
+    select count(*), c."name"
+    from "workOrder" AS wo 
+    INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id   and two.deleted = false
+              and (two."creationDate" between $1 and $2
+                or two."modificationDate" between $1 and $2) 
+    inner JOIN customers c  on wo."clientId"::integer = c.id and c.status = true and c.deleted = false
+    group by c."name"
+    order by 2
+    limit 7;`, 
+    [
+      initialDate,
+      finalDate,
+    ]);
+  return response.rows;
+}
+exports.summaryWorksOrdersPerOperatorByDate = async(initialDate,finalDate) => {
+  const response = await db.query(`
+  select count(*), o2."firstNames" 
+  from "taskWorkOrder" as two 
+  inner join operators o2 ON o2.id = two."operatorId" 
+    where (two."creationDate" between $1 and $2
+          or two."modificationDate" between $1 and $2) 
+      and two.deleted = false
+      group by o2."firstNames" 
+      order by upper(o2."firstNames")`, 
+  [
+    initialDate,
+    finalDate,
+  ]);
+  return response.rows;
+}
+exports.summaryWorksOrdersPendingPerCustomerByDate = async(initialDate,finalDate) => {
+  const response = await db.query(`
+  select count(*), c."name"
+          from "workOrder" AS wo 
+          INNER JOIN "taskWorkOrder" as two ON two."workOrderId" = wo.id   and two.deleted = false
+            and (two."creationDate" between $1 and $2
+              or two."modificationDate" between $1 and $2) 
+              AND two.status IN ($3,$4,$5)
+		inner JOIN customers c  on wo."clientId"::integer = c.id and c.status = true and c.deleted = FALSE		
+              group by c."name"
+              order by 2;`, 
+  [
+    initialDate,
+    finalDate,
+    process.env.CTG_TASKS_IN_WORK_ORDER_ASSIGNED,
+    process.env.CTG_TASKS_IN_WORK_ORDER_INITIALIZED,
+    process.env.CTG_TASKS_IN_WORK_ORDER_INPROCESS,
+]);
   return response.rows;
 }
