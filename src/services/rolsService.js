@@ -119,6 +119,8 @@ exports.validateRolBody = wrapAsyncFn(async (req,res,next) => {
         read: Joi.boolean().required(),
         write: Joi.boolean().required(),
         delete: Joi.boolean().required(),
+        root: Joi.number().integer().allow(null),
+        parent: Joi.number().integer().allow(null),
       })
     ),
     creationUser: Joi.string().allow(null).empty(''),

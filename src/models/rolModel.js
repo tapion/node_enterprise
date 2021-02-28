@@ -37,21 +37,49 @@ exports.getRolById = async (rolId) => {
       );
 };
 
+const saveMenuOptions = async (client,menu) => {
+  return client.query(
+    `INSERT INTO "menuOptionsByRole"
+    ("menuOptionId", rolid, "read", "write", "delete", "creationUser")
+    VALUES($1, $2, $3, $4, $5, $6)`,
+    [
+      menu.id,
+      menu.rol,
+      menu.read,
+      menu.write,
+      menu.delete,
+      menu.userName
+    ]
+  );
+}
+
+const validateParentAndRoot = async (client,parent,menu,parents) => {
+  if(parent && !parents.includes(parent)){
+    menu.id = parent;
+    await saveMenuOptions(client,menu);
+    return [...parents,parent];
+  }
+  return parents;
+}
+
 const insertMenuOptions = async (client,rolId,body,userName) => {
+  let parents = [];  
   return Promise.all(body.menuOptions.map(async opc => {
-    return client.query(
-      `INSERT INTO "menuOptionsByRole"
-      ("menuOptionId", rolid, "read", "write", "delete", "creationUser")
-      VALUES($1, $2, $3, $4, $5, $6)`,
-      [
-        opc.id,
-        rolId,
-        opc.read,
-        opc.write,
-        opc.delete,
-        userName
-      ]
-    );
+    const menu = {
+      id: 0,
+      rol: rolId,
+      read: true,
+      write: true,
+      delete: true,
+      userName: userName,
+    }
+    parents = await validateParentAndRoot(client,opc.root,menu,parents);
+    parents = await validateParentAndRoot(client,opc.parent,menu,parents);
+    menu.id = opc.id;
+    menu.read = opc.read;
+    menu.write = opc.write;
+    menu.delete = opc.delete;
+    return saveMenuOptions(client,menu);
   }));
 }
 
