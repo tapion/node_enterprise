@@ -75,8 +75,6 @@ const assignBurnData = (ot) => {
   //ot.idSubOt = 1407; //QUEMADO
   ot.idCreateMovil = 0;
   ot.isMovilCreate = 0;
-  ot.dateStart = parseInt(Date.now() / 1000, 10); //QUEMADO
-  ot.dateEnd = parseInt(Date.now() / 1000, 10); //QUEMADO
   ot.detail = ''; //QUEMADO
   ot.labelOT = '177/1407';
   //En teoria es catalogo 31 Prioridades?
@@ -174,7 +172,11 @@ const asignOtValues = async (otsTmp,closeTypes,token) => {
           }),
       };
       delete ot.idTypeOT;
-      delete ot.orderTypeTaskId;
+      delete ot.trackingPerMinute;
+      delete ot.syncNetwork;
+      delete ot.syncWifi;
+      delete ot.uploadFilesCamera;
+      delete ot.uploadFilesGallery;
       return ot;
     })
   );  
@@ -203,6 +205,7 @@ exports.workOrders = wrapAsyncFn(async (req, res) => {
         division: 'MANTENIMIENTO', //QUEMADO
       };
     });
+    const secondsToSendDate = ((otsTmp.rows[0].trackingPerMinute * 1) > 0) ? otsTmp.rows[0].trackingPerMinute * 60 : 60;
     const ots = await asignOtValues(otsTmp,closeTypes,req.get('Authorization'));
     res.status(200).json({
       status: 200,
@@ -211,8 +214,12 @@ exports.workOrders = wrapAsyncFn(async (req, res) => {
       data: {
         trackInformation: {
           id: 0, //QUEMADO
-          secondSendData: 60, //QUEMADO
-          secondSendLocation: 60, //QUEMADO
+          secondSendData: secondsToSendDate,
+          secondSendLocation: secondsToSendDate,
+          hasSyncNetwork: otsTmp.rows[0].syncNetwork,
+          hasSyncWifi: otsTmp.rows[0].syncWifi,
+          allowUploadFilesCamera: otsTmp.rows[0].uploadFilesCamera,
+          allowUploadFilesGallery: otsTmp.rows[0].uploadFilesGallery,
           startJourney: true, //QUEMADO
           gpsEnabled: true, //QUEMADO
           timeSync: 1538599265, //QUEMADO

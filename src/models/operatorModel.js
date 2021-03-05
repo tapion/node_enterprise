@@ -6,7 +6,14 @@ dotenv.config({ path: './config.env' });
 exports.getWorkOrderByOperator = async (operatorId) => {
   return db.query(
     `SELECT 
-          two.id AS "taskId"
+          o2."trackingPerMinute" 
+          , floor(EXTRACT(EPOCH FROM two."creationDate")) AS "dateStart"
+          , floor(EXTRACT(EPOCH FROM two."creationDate" + INTERVAL '2 day')) AS "dateEnd"  
+          ,o2."syncNetwork" 
+          ,o2."syncWifi" 
+          ,o2."uploadFilesCamera" 
+          ,o2."uploadFilesGallery" 
+          ,two.id AS "taskId"
           ,two."orderTypeTaskId"
           ,task.name AS "taskName"
           ,wo.id
@@ -29,6 +36,7 @@ exports.getWorkOrderByOperator = async (operatorId) => {
           ,two.status
           ,case when two."editionOnWeb" is null then  false else two."editionOnWeb" end AS "isWeb"
       FROM "taskWorkOrder" two 
+      INNER JOIN operators o2 ON o2.id = two."operatorId" AND o2.deleted = false
       inner JOIN "workOrder" wo ON two."workOrderId" = wo.id
       inner join "orderTypeTask" ott on ott.id = two."orderTypeTaskId" 
       INNER JOIN catalogue task ON task.id = ott."taskId" 
