@@ -49,13 +49,13 @@ const findAnswer = (questionId,response) => {
   return null;
 }
 
-const buildFormForMobile = async (form,taskForWeb) => {
+const buildFormForMobile = async (form,taskForWeb,token) => {
   const sectionsResponse = await formModel.getSectionsByForm(form.id);
   const responseFromWeb = (taskForWeb) ? await formModel.responseTaskAsignedByweb(taskForWeb,form.id) : null;
   return Promise.all(
     sectionsResponse.rows.map(async (sec) => {
       sec.name = sec.title;
-      sec.questions = await formModel.getQuestionsBySection(sec.id);
+      sec.questions = await formModel.getQuestionsBySection(sec.id,token);
       sec.questions.forEach((qu) => {
         qu.type = formModel.types.find((el) => el.id === qu.type * 1).mobile;
         qu.condition.forEach((q) => {
@@ -121,11 +121,11 @@ const assignBurnData = (ot) => {
   ot.place.client.id = 111; //QUEMADO
 };
 
-const formsByTaskId = async (typeOrder,taskForWeb) => {
+const formsByTaskId = async (typeOrder,taskForWeb,token) => {
   const form = await formModel.getFormsByTaskId(typeOrder);
   return Promise.all(
     form.rows.map(async (frm) => {
-      frm.sections = await buildFormForMobile(frm,taskForWeb);
+      frm.sections = await buildFormForMobile(frm,taskForWeb,token);
       return frm;
     })
   );
@@ -147,7 +147,7 @@ exports.getTasksByUser = wrapAsyncFn(async (req, res) => {
   });
 });
 
-const asignOtValues = async (otsTmp,closeTypes) => {
+const asignOtValues = async (otsTmp,closeTypes,token) => {
   return Promise.all(
     otsTmp.rows.map(async (ot) => {
       ot.staus = {
@@ -163,7 +163,7 @@ const asignOtValues = async (otsTmp,closeTypes) => {
       assignBurnData(ot);
       ot.typesClosure = closeTypes;
       const taskIdWeb = ot.isWeb ? ot.taskId : null;
-      ot.forms = await formsByTaskId(ot.orderTypeTaskId,taskIdWeb);
+      ot.forms = await formsByTaskId(ot.orderTypeTaskId,taskIdWeb,token);
       ot.typeOT = {
         id: ot.idTypeOT,
         type: ot.typeOT,
@@ -203,7 +203,7 @@ exports.workOrders = wrapAsyncFn(async (req, res) => {
         division: 'MANTENIMIENTO', //QUEMADO
       };
     });
-    const ots = await asignOtValues(otsTmp,closeTypes);
+    const ots = await asignOtValues(otsTmp,closeTypes,req.get('Authorization'));
     res.status(200).json({
       status: 200,
       message: 'lbl_resp_succes',
