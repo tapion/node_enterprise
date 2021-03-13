@@ -90,6 +90,9 @@ exports.login = wrapAsyncFn(async (req, res) => {
     !await validatePassword(req.body.password, user.rows[0].password)
   )
     throw new AppError('User or email invalid', 404);
+  const trackingPerMinute = user.rowCount > 0 ? user.rows[0].trackingPerMinute : 0;
+  const secondSendLocation = trackingPerMinute * 60;
+  const gpsEnabled = secondSendLocation > 0 ? true : false;
   res.status(200).json({
     status: 200,
     message: 'lbl_resp_succes',
@@ -101,6 +104,9 @@ exports.login = wrapAsyncFn(async (req, res) => {
         user.rows[0],
         process.env.JWT_EXPIRE_REFRESH
       ),
+      combineOrderWork: true, // QUEMADO
+      gpsEnabled,
+      secondSendLocation,
     },
   });
 });
@@ -208,6 +214,9 @@ exports.deleteUserById = wrapAsyncFn(async (req, res) => {
 
 exports.saveUser = wrapAsyncFn(async (req, res) => {
   const users = await userModel.createUser(req.body,req.userLoged, await bcrypt.hash(req.body.password, 12));
+  if(users === false){
+    throw new AppError('User or email have already created', 400);
+  }
   res.status(201).json({
     status: 201,
     rowAffected: users.rowCount,

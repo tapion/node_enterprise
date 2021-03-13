@@ -205,7 +205,13 @@ exports.workOrders = wrapAsyncFn(async (req, res) => {
         division: 'MANTENIMIENTO', //QUEMADO
       };
     });
-    const secondsToSendDate = ((otsTmp.rows[0].trackingPerMinute * 1) > 0) ? otsTmp.rows[0].trackingPerMinute * 60 : 60;
+    const trakingInfo = otsTmp.rowCount > 0 ? otsTmp.rows[0] : {trackingPerMinute: 0};
+    const secondSendData = ((trakingInfo.trackingPerMinute * 1) > 0) ? trakingInfo.trackingPerMinute * 60 : 0;
+    const gpsEnabled = trakingInfo.trackingPerMinute > 0 ? true : false;
+    const hasSyncNetwork = trakingInfo.syncNetwork || false;
+    const hasSyncWifi = trakingInfo.syncWifi || false;
+    const allowUploadFilesCamera = trakingInfo.uploadFilesCamera || false;
+    const allowUploadFilesGallery = trakingInfo.uploadFilesGallery || false;
     const ots = await asignOtValues(otsTmp,closeTypes,req.get('Authorization'));
     res.status(200).json({
       status: 200,
@@ -214,14 +220,14 @@ exports.workOrders = wrapAsyncFn(async (req, res) => {
       data: {
         trackInformation: {
           id: 0, //QUEMADO
-          secondSendData: secondsToSendDate,
-          secondSendLocation: secondsToSendDate,
-          hasSyncNetwork: otsTmp.rows[0].syncNetwork,
-          hasSyncWifi: otsTmp.rows[0].syncWifi,
-          allowUploadFilesCamera: otsTmp.rows[0].uploadFilesCamera,
-          allowUploadFilesGallery: otsTmp.rows[0].uploadFilesGallery,
+          secondSendData,
+          secondSendLocation: secondSendData,
+          hasSyncNetwork,
+          hasSyncWifi,
+          allowUploadFilesCamera,
+          allowUploadFilesGallery,
+          gpsEnabled,
           startJourney: true, //QUEMADO
-          gpsEnabled: true, //QUEMADO
           timeSync: 1538599265, //QUEMADO
           phone: 'string', //QUEMADO
           version: '1.0', //QUEMADO

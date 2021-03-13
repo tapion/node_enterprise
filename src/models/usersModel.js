@@ -1,6 +1,18 @@
 const db = require('../db');
 
-exports.createUser = async (body, user,password) => {
+const isDuplicateUserOrEmail = async (email,user) => {
+  const result = await db.query(`
+    SELECT email 
+    FROM users u 
+    WHERE u.email = $1
+    OR u."userName" = $2`,[email, user]);
+  return result.rowCount > 0 ? true : false;
+}
+
+exports.createUser = async (body, user,password) => {  
+  if(await isDuplicateUserOrEmail(body.email,body.login)){
+    return false;
+  }
   const roles = body.roles.map(rol => rol.id);
   return db.query(
     `INSERT INTO users
@@ -70,6 +82,7 @@ exports.getUser = async (email) => {
         , u.password
         , u."changedPasswordAt" 
         , o2.id as "operatorId"
+        , o2."trackingPerMinute"
         , u."rolesId"
       FROM users u
       left join operators o2 on o2."userName" = u."userName" and o2.active = true and o2.deleted = false
