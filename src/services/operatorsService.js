@@ -230,7 +230,7 @@ exports.workOrders = wrapAsyncFn(async (req, res) => {
           startJourney: true, //QUEMADO
           timeSync: 1538599265, //QUEMADO
           phone: 'string', //QUEMADO
-          version: '1.0', //QUEMADO
+          version: '1.0.1', //QUEMADO
           userStatus: 0, //QUEMADO
         },
         acl: [
